@@ -17,13 +17,13 @@ package org.frameworkset.elasticsearch.imp;
 
 
 import org.frameworkset.elasticsearch.ElasticSearchHelper;
-import org.frameworkset.elasticsearch.client.DataRefactor;
-import org.frameworkset.elasticsearch.client.DataStream;
-import org.frameworkset.elasticsearch.client.ExportResultHandler;
-import org.frameworkset.elasticsearch.client.context.Context;
-import org.frameworkset.elasticsearch.client.task.TaskCommand;
+import org.frameworkset.tran.DataRefactor;
+import org.frameworkset.tran.DataStream;
+import org.frameworkset.tran.ExportResultHandler;
+import org.frameworkset.tran.context.Context;
 import org.frameworkset.tran.kafka.KafkaImportConfig;
 import org.frameworkset.tran.kafka.input.es.Kafka2ESExportBuilder;
+import org.frameworkset.tran.task.TaskCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,7 +58,7 @@ public class Kafka2ESdemo {
 		if(dropIndice) {
 			try {
 				//清除测试表,导入的时候回重建表，测试的时候加上为了看测试效果，实际线上环境不要删表
-				String repsonse = ElasticSearchHelper.getRestClientUtil().dropIndice("mongodbdemo");
+				String repsonse = ElasticSearchHelper.getRestClientUtil().dropIndice("kafkademo");
 				System.out.println(repsonse);
 			} catch (Exception e) {
 			}
