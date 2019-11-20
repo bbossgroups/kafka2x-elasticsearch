@@ -114,8 +114,10 @@ public class Kafka2ESdemo {
 				.addKafkaConfig("bootstrap.servers","192.168.137.133:9093")
 				.addKafkaConfig("enable.auto.commit","true")
 				.setKafkaTopic("blackcatstore")
-				.setConsumerThreads(5).setCheckinterval(2000)
-				.setDiscardRejectMessage(false).setPollTimeOut(1000)
+				.setConsumerThreads(5)
+				.setCheckinterval(2000)
+				.setDiscardRejectMessage(false)
+				.setPollTimeOut(1000)
 				.setValueCodec(KafkaImportConfig.CODEC_JSON)
 				.setKeyCodec(KafkaImportConfig.CODEC_LONG);
 
