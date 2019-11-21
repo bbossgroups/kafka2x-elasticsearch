@@ -119,7 +119,8 @@ public class Kafka2ESdemo {
 				.setDiscardRejectMessage(false)
 				.setPollTimeOut(1000)
 				.setValueCodec(KafkaImportConfig.CODEC_JSON)
-				.setKeyCodec(KafkaImportConfig.CODEC_LONG);
+				.setKeyCodec(KafkaImportConfig.CODEC_LONG)
+		;
 
 //		importBuilder.addIgnoreFieldMapping("remark1");
 //		importBuilder.setSql("select * from td_sm_log ");
