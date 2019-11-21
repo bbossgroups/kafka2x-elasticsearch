@@ -8,11 +8,10 @@ JDK requirement: JDK 1.7+
 Elasticsearch version requirements: 1.x,2.X,5.X,6.X,+
 
 Spring booter 1.x,2.x,+
-# Mongodb-Elasticsearch 数据同步工具demo
-使用本demo所带的应用程序运行容器环境，可以快速编写，打包发布可运行的数据导入工具
+# kafka2x-Elasticsearch 数据同步工具demo
+ 兼容 kafka_2.12-2.3.0 系列版本  ,使用本demo所带的应用程序运行容器环境，可以快速编写，打包发布可运行的数据导入工具
 
-支持的数据库：
-mongodb 到elasticsearch数据同步
+支持的 kafka_2.12-2.3.0 系列版本  到elasticsearch数据同步
 
 支持的Elasticsearch版本：
 1.x,2.x,5.x,6.x,7.x,+
@@ -26,8 +25,8 @@ mongodb 到elasticsearch数据同步
 ```xml
 <dependency>
   <groupId>com.bbossgroups.plugins</groupId>
-  <artifactId>bboss-elasticsearch-rest-mongodb</artifactId>
-  <version>5.9.2</version>
+  <artifactId>bboss-elasticsearch-rest-kafka2x</artifactId>
+  <version>5.9.3</version>
   <scope>compile</scope>
 </dependency>
 ```
@@ -39,37 +38,35 @@ mongodb 到elasticsearch数据同步
 https://esdoc.bbossgroups.com/#/bboss-build
 
 ## 下载源码工程-基于gradle
-<https://github.com/bbossgroups/mongodb-elasticsearch>
+ https://github.com/bbossgroups/kafka2x-elasticsearch 
 
 从上面的地址下载源码工程，然后导入idea或者eclipse，根据自己的需求，修改导入程序逻辑
 
-org.frameworkset.elasticsearch.imp.Mongodb2ESdemo
+org.frameworkset.elasticsearch.imp.Kafka2ESdemo
 
-如果需要测试和调试导入功能，运行Mongodb2ESdemo的main方法即可即可：
+如果需要测试和调试导入功能，运行Kafka2ESdemo的main方法即可即可：
 
 
 ```java
 public class Dbdemo {
 	public static void main(String args[]){
+		Kafka2ESdemo dbdemo = new Kafka2ESdemo();
+		boolean dropIndice = true;//CommonLauncher.getBooleanAttribute("dropIndice",false);//同时指定了默认值
 
-		Mongodb2ESdemo dbdemo = new Mongodb2ESdemo();
-        		boolean dropIndice = true;//CommonLauncher.getBooleanAttribute("dropIndice",false);//同时指定了默认值
-        
-        		dbdemo.scheduleTimestampImportData(dropIndice);
-
+		dbdemo.scheduleTimestampImportData(dropIndice);
 	}
     .....
 }
 ```
 
-修改es配置-mongodb-elasticsearch\src\main\resources\application.properties
+修改es配置-kafka2x-elasticsearch\src\main\resources\application.properties
 
 
 
 修改完毕配置后，就可以进行功能调试了。
 
 
-测试调试通过后，就可以构建发布可运行的版本了：进入命令行模式，在源码工程根目录mongodb-elasticsearch下运行以下gradle指令打包发布版本
+测试调试通过后，就可以构建发布可运行的版本了：进入命令行模式，在源码工程根目录kafka2x-elasticsearch 下运行以下gradle指令打包发布版本
 
 release.bat
 
@@ -91,39 +88,17 @@ windows: restart.bat
 
 -Xmx1g
 
-## 在工程中添加多个表同步作业
-默认的作业任务是Dbdemo，同步表td_sm_log的数据到索引dbdemo/dbdemo中
 
-现在我们在工程中添加另外一张表td_cms_document的同步到索引cms_document/cms_document的作业步骤：
-
-1.首先，新建一个带main方法的类org.frameworkset.elasticsearch.imp.CMSDocumentImport,实现同步的逻辑
-
-如果需要测试调试，添加main方法,然后debug即可
-
-2.然后，在runfiles目录下新建CMSDocumentImport作业主程序和作业进程配置文件：runfiles/config-cmsdocmenttable.properties，内容如下：
-
-mainclass=org.frameworkset.elasticsearch.imp.CMSDocumentImport
-
-pidfile=CMSDocumentImport.pid  
-
-
-3.最后在runfiles目录下新建作业启动sh文件（这里只新建linux/unix指令，windows的类似）：runfiles/restart-cmsdocumenttable.sh
-
-内容与默认的作业任务是Dbdemo内容一样，只是在java命令后面多加了一个参数，用来指定作业配置文件：--conf=config-cmsdocmenttable.properties
-
-nohup java \$RT_JAVA_OPTS -jar ${project}-${bboss_version}.jar restart --conf=config-cmsdocmenttable.properties --shutdownLevel=9 > ${project}.log &
-
-其他stop shell指令也类似建立即可
 
  
 
 # 作业参数配置
 
-在使用[db-elasticsearch-tool](https://github.com/bbossgroups/db-elasticsearch-tool)时，为了避免调试过程中不断打包发布数据同步工具，可以将部分控制参数配置到启动配置文件resources/application.properties中,然后在代码中通过以下方法获取配置的参数：
+在使用[kafka2x-elasticsearch ](https://github.com/bbossgroups/kafka2x-elasticsearch )时，为了避免调试过程中不断打包发布数据同步工具，可以将部分控制参数配置到启动配置文件resources/application.properties中,然后在代码中通过以下方法获取配置的参数：
 
 ```ini
 #工具主程序
-mainclass=org.frameworkset.elasticsearch.imp.Mongodb2ESdemo
+mainclass=org.frameworkset.elasticsearch.imp.Kafka2ESdemo
 
 # 参数配置
 # 在代码中获取方法：CommonLauncher.getBooleanAttribute("dropIndice",false);//同时指定了默认值false
