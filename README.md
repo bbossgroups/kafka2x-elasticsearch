@@ -26,7 +26,7 @@ Spring booter 1.x,2.x,+
 <dependency>
   <groupId>com.bbossgroups.plugins</groupId>
   <artifactId>bboss-elasticsearch-rest-kafka2x</artifactId>
-  <version>5.9.6</version>
+  <version>5.9.7</version>
   <scope>compile</scope>
 </dependency>
 ```
