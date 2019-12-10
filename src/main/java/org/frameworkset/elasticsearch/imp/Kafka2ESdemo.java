@@ -123,6 +123,7 @@ public class Kafka2ESdemo {
 				.setKeyCodec(KafkaImportConfig.CODEC_LONG)
 		;
 
+
 //		importBuilder.addIgnoreFieldMapping("remark1");
 //		importBuilder.setSql("select * from td_sm_log ");
 		/**
@@ -133,9 +134,10 @@ public class Kafka2ESdemo {
 				.setIndexType("kafkademo") //es 7以后的版本不需要设置indexType，es7以前的版本必需设置indexType
 				.setRefreshOption("refresh")//可选项，null表示不实时刷新，importBuilder.setRefreshOption("refresh");表示实时刷新
 				.setPrintTaskLog(true) //可选项，true 打印任务执行日志（耗时，处理记录数） false 不打印，默认值false
-				.setBatchSize(10)  //可选项,批量导入es的记录数，默认为-1，逐条处理，> 0时批量处理
+				.setBatchSize(100)  //可选项,批量导入es的记录数，默认为-1，逐条处理，> 0时批量处理
 				.setFetchSize(100); //按批从kafka拉取数据的大小
-
+		//异步消费数据时，强制刷新检测空闲时间间隔，在空闲flushInterval后，还没有数据到来，强制将已经入列的数据进行存储操作
+		importBuilder.setFlushInterval(10000);
 		//定时任务配置结束
 //
 //		//设置任务执行拦截器，可以添加多个，定时任务每次执行的拦截器
