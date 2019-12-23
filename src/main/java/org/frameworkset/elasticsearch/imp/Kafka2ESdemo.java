@@ -66,6 +66,8 @@ public class Kafka2ESdemo {
 		}
 
 
+
+
 		//kafka相关配置参数
 		/**
 		 *
@@ -106,19 +108,21 @@ public class Kafka2ESdemo {
 		 </property>
 		 */
 
+		// kafka服务器参数配置
+		// kafka 2x 客户端参数项及说明类：org.apache.kafka.clients.consumer.ConsumerConfig
 		importBuilder//.addKafkaConfig("value.deserializer","org.apache.kafka.common.serialization.StringDeserializer")
 				//.addKafkaConfig("key.deserializer","org.apache.kafka.common.serialization.LongDeserializer")
-				.addKafkaConfig("group.id","test")
+				.addKafkaConfig("group.id","test") // 消费组ID
 				.addKafkaConfig("session.timeout.ms","30000")
 				.addKafkaConfig("auto.commit.interval.ms","5000")
 				.addKafkaConfig("auto.offset.reset","latest")
 				.addKafkaConfig("bootstrap.servers","192.168.137.133:9093")
 				.addKafkaConfig("enable.auto.commit","true")
-				.setKafkaTopic("blackcatstore")
-				.setConsumerThreads(5)
-				.setCheckinterval(2000)
-				.setDiscardRejectMessage(false)
-				.setPollTimeOut(1000)
+				.setKafkaTopic("blackcatstore") // kafka topic
+				.setConsumerThreads(5) // 并行消费线程数，建议与topic partitions数一致
+				.setCheckinterval(2000)   // 批量从kafka拉取数据，闲置时间间隔，如果在指定的时间间隔内，没有数据到达并且数据拉取队列中有数据，则强制将队列中的数据交给同步作业程序进行同步处理
+				.addKafkaConfig("max.poll.records",500) // The maximum number of records returned in a single call to poll().
+				.setPollTimeOut(1000) // 从kafka consumer poll(timeout)参数
 				.setValueCodec(KafkaImportConfig.CODEC_JSON)
 				.setKeyCodec(KafkaImportConfig.CODEC_LONG)
 		;
