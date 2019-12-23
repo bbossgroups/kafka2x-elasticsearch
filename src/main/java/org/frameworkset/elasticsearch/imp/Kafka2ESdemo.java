@@ -208,8 +208,10 @@ public class Kafka2ESdemo {
 			public void refactor(Context context) throws Exception  {
 				 //添加字段extfiled到记录中，值为1
 				 context.addFieldValue("extfiled",1);
+				 // 将long类型字段值转换为Date类型
 				 long birthDay = context.getLongValue("birthDay");
 				 context.addFieldValue("birthDay",new Date(birthDay));
+				 // 获取原始的Kafka记录
 				 KafkaMapRecord record = (KafkaMapRecord) context.getRecord();
 				 if(record.getKey() == null)
 				 	System.out.println("key is null!");
