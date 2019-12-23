@@ -7,11 +7,13 @@ JDK requirement: JDK 1.7+
 
 Elasticsearch version requirements: 1.x,2.X,5.X,6.X,+
 
-Spring booter 1.x,2.x,+
+Spring boot： 1.x,2.x,+
 # kafka2x-Elasticsearch 数据同步工具demo
  兼容 kafka_2.12-2.3.0 系列版本  ,使用本demo所带的应用程序运行容器环境，可以快速编写，打包发布可运行的数据导入工具
 
 支持的 kafka_2.12-2.3.0 系列版本  到elasticsearch数据同步
+
+kafka低版本（kafka_2.12-0.10.2.0系列版本）同步工具案例地址：https://gitee.com/bbossgroups/kafka1x-elasticsearch
 
 支持的Elasticsearch版本：
 1.x,2.x,5.x,6.x,7.x,+
