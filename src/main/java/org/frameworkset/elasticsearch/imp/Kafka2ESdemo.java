@@ -142,8 +142,7 @@ public class Kafka2ESdemo {
 				.setFetchSize(100); //按批从kafka拉取数据的大小
 		//异步消费数据时，强制刷新检测空闲时间间隔，在空闲flushInterval后，还没有数据到来，强制将已经入列的数据进行存储操作
 		importBuilder.setFlushInterval(10000);
-		//定时任务配置结束
-//
+
 //		//设置任务执行拦截器，可以添加多个，定时任务每次执行的拦截器
 //		importBuilder.addCallInterceptor(new CallInterceptor() {
 //			@Override
