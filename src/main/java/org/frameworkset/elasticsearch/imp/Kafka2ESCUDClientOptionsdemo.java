@@ -35,8 +35,7 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * <p>Description: 同步处理程序，如需调试同步功能，
- * 请运行测试用例DbdemoTest中调试</p>
+ * <p>Description: 同步处理程序，如需调试同步功能，直接运行main方法</p>
  * <p></p>
  * <p>Copyright (c) 2018</p>
  * @Date 2018/9/27 20:38
@@ -246,7 +245,7 @@ public class Kafka2ESCUDClientOptionsdemo {
 							.setReturnSource(true)
 							.setEsRetryOnConflict(1);//设置文档主键，不设置，则自动产生文档id;
 					context.setClientOptions(clientOptions);
-					context.setIndex("kafkademo-{dateformat=yyyy.MM.dd}");
+					context.setIndex("kafkbdemo-{dateformat=yyyy.MM.dd}");
 					context.markRecoredUpdate();
 				}
 				else if(r == 2){
@@ -257,7 +256,7 @@ public class Kafka2ESCUDClientOptionsdemo {
 					;//设置文档主键，不设置，则自动产生文档id;
 					context.setClientOptions(clientOptions);
 					context.markRecoredDelete();
-					context.setIndex("kafkademo-{dateformat=yyyy.MM.dd}");
+					context.setIndex("kafkcdemo-{dateformat=yyyy.MM.dd}");
 				}
 				//上述三个属性已经放置到docInfo中，如果无需再放置到索引文档中，可以忽略掉这些属性
 //				context.addIgnoreFieldMapping("author");
@@ -295,6 +294,7 @@ public class Kafka2ESCUDClientOptionsdemo {
 			@Override
 			public void exception(TaskCommand<String,String> taskCommand, Exception exception) {
 				System.out.println(taskCommand.getTaskMetrics());
+				exception.printStackTrace();
 			}
 
 			@Override
