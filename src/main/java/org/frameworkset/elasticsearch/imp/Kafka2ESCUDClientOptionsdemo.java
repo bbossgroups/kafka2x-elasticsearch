@@ -123,7 +123,7 @@ public class Kafka2ESCUDClientOptionsdemo {
 				.setKafkaTopic("blackcatstore") // kafka topic
 				.setConsumerThreads(5) // 并行消费线程数，建议与topic partitions数一致
 				.setCheckinterval(2000)   // 批量从kafka拉取数据，闲置时间间隔，如果在指定的时间间隔内，没有数据到达并且数据拉取队列中有数据，则强制将队列中的数据交给同步作业程序进行同步处理
-				.addKafkaConfig("max.poll.records",500) // The maximum number of records returned in a single call to poll().
+				.addKafkaConfig("max.poll.records","500") // The maximum number of records returned in a single call to poll().
 				.setPollTimeOut(1000) // 从kafka consumer poll(timeout)参数
 				.setValueCodec(KafkaImportConfig.CODEC_JSON)
 				.setKeyCodec(KafkaImportConfig.CODEC_LONG)
