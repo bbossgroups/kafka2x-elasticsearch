@@ -127,7 +127,7 @@ public class Kafka2ESCUDClientOptionsdemo {
 				.setValueCodec(KafkaImportConfig.CODEC_JSON)
 				.setKeyCodec(KafkaImportConfig.CODEC_LONG)
 		;
-
+		importBuilder.setTargetElasticsearch("default");
 
 //		importBuilder.addIgnoreFieldMapping("remark1");
 //		importBuilder.setSql("select * from td_sm_log ");
