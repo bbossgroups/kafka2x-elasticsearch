@@ -136,6 +136,7 @@ configure(allprojects) { project ->
 			[group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: "${log4j2_version}", transitive: true],
 				[group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: "${log4j2_version}", transitive: true]
 		)
+		compile 'com.github.shyiko:mysql-binlog-connector-java:0.18.1'
 		compile(
 				[group: 'com.bbossgroups.plugins', name: 'bboss-elasticsearch-rest-kafka2x', version: "${bboss_es_version}", transitive: true],
 		)

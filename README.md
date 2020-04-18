@@ -26,7 +26,7 @@ Spring boot： 1.x,2.x,+
 <dependency>
   <groupId>com.bbossgroups.plugins</groupId>
   <artifactId>bboss-elasticsearch-rest-kafka2x</artifactId>
-  <version>6.0.8</version>
+  <version>6.0.9</version>
   <scope>compile</scope>
 </dependency>
 ```
@@ -202,7 +202,7 @@ importBuilder.setQueue(queueSize);//设置批量导入线程池等待队列长�
 importBuilder.setThreadCount(workThreads);//设置批量导入线程池工作线程数量
 ```
 
- 
+ bin/kafka-console-consumer.sh --zookeeper 10.19.85.65:2185 --topic mysqlbinlog 
 
 ## elasticsearch技术交流群:166471282 
 
