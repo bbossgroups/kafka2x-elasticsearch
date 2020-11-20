@@ -26,7 +26,7 @@ Spring boot： 1.x,2.x,+
 <dependency>
   <groupId>com.bbossgroups.plugins</groupId>
   <artifactId>bboss-elasticsearch-rest-kafka2x</artifactId>
-  <version>6.2.2</version>
+  <version>6.2.3</version>
   <scope>compile</scope>
 </dependency>
 ```
@@ -121,7 +121,7 @@ org.frameworkset.elasticsearch.imp.Kafka2ESdemo
 
 ```java
 public class Dbdemo {
-	public static void main(String args[]){
+	public static void main(String[] args){
 		Kafka2ESdemo dbdemo = new Kafka2ESdemo();
 		boolean dropIndice = true;//CommonLauncher.getBooleanAttribute("dropIndice",false);//同时指定了默认值
 
