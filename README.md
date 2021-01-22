@@ -8,7 +8,7 @@ JDK requirement: JDK 1.7+
 Elasticsearch version requirements: 1.x,2.X,5.X,6.X,+
 
 Spring boot： 1.x,2.x,+
-# kafka2x-Elasticsearch 数据同步工具demo
+# kafka2x-Elasticsearch kafka2x-Database数据同步工具demo
  适用于新版本kafka client包  ,使用本demo所带的应用程序运行容器环境，可以快速编写，打包发布可运行的数据导入工具
 
 支持的kafka_2.12-0.10.2.0系列版本、 kafka_2.12-2.3.0 系列版本
@@ -114,15 +114,35 @@ https://esdoc.bbossgroups.com/#/bboss-build
 
 从上面的地址下载源码工程，然后导入idea或者eclipse，根据自己的需求，修改导入程序逻辑
 
+### kafka到Elasticsearch同步功能调测
 org.frameworkset.elasticsearch.imp.Kafka2ESdemo
 
-如果需要测试和调试导入功能，运行Kafka2ESdemo的main方法即可即可：
+如果需要测试和调试导入功能，运行Kafka2ESdemo的main方法即可：
 
 
 ```java
-public class Dbdemo {
+public class Kafka2ESdemo {
 	public static void main(String[] args){
 		Kafka2ESdemo dbdemo = new Kafka2ESdemo();
+		boolean dropIndice = true;//CommonLauncher.getBooleanAttribute("dropIndice",false);//同时指定了默认值
+
+		dbdemo.scheduleTimestampImportData(dropIndice);
+	}
+    .....
+}
+```
+
+### kafka到Database同步功能调测
+以mysql为例，也支持其他数据库，支持增删改数据的同步
+org.frameworkset.elasticsearch.imp.Kafka2DBdemo
+
+如果需要测试和调试导入功能，运行Kafka2DBdemo的main方法即可：
+
+
+```java
+public class Kafka2ESdemo {
+	public static void main(String[] args){
+		Kafka2DBdemo dbdemo = new Kafka2DBdemo();
 		boolean dropIndice = true;//CommonLauncher.getBooleanAttribute("dropIndice",false);//同时指定了默认值
 
 		dbdemo.scheduleTimestampImportData(dropIndice);
@@ -168,9 +188,10 @@ windows: restart.bat
 
 在使用[kafka2x-elasticsearch ](https://github.com/bbossgroups/kafka2x-elasticsearch )时，为了避免调试过程中不断打包发布数据同步工具，可以将部分控制参数配置到启动配置文件resources/application.properties中,然后在代码中通过以下方法获取配置的参数：
 
-```ini
+```properties
 #工具主程序
 mainclass=org.frameworkset.elasticsearch.imp.Kafka2ESdemo
+#mainclass=org.frameworkset.elasticsearch.imp.Kafka2DBdemo
 
 # 参数配置
 # 在代码中获取方法：CommonLauncher.getBooleanAttribute("dropIndice",false);//同时指定了默认值false

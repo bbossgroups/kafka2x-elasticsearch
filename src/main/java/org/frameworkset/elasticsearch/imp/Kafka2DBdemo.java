@@ -124,6 +124,20 @@ public class Kafka2DBdemo {
 		 </property>
 		 */
 
+		//bin/kafka-console-producer.sh --broker-list 10.13.11.12:9092 --topic xinkonglog
+		/**
+		 * 发送测试数据
+		 {"collecttime":1588864468000,"optime":1526747614000,"author":"duoduo","subtitle":"小康","name":"认证管理","oper":"admin","id":269389,"title":"解放","ipinfo":"{\"country\":\"中国\",\"countryId\":\"CN\",\"area\":\"\",\"areaId\":\"\",\"region\":\"浙江省\",\"regionId\":\"ZJ\",\"city\":\"杭州\",\"cityId\":\"\",\"county\":\"浙江省\",\"countyId\":\"ZJ\",\"isp\":\"Chinanet\",\"ispId\":4134,\"ip\":\"115.204.150.34\",\"geoPoint\":{\"lon\":120.1619,\"lat\":30.294}}","content":"admin(系统管理员) 退出[公共开发平台]"}
+		 {"collecttime":1588864468000,"optime":1523458966000,"author":"duoduo","subtitle":"小康","name":"认证管理","oper":"admin","id":269390,"title":"解放","ipinfo":"{\"country\":\"中国\",\"countryId\":\"CN\",\"area\":\"\",\"areaId\":\"\",\"region\":\"浙江省\",\"regionId\":\"ZJ\",\"city\":\"杭州\",\"cityId\":\"\",\"county\":\"浙江省\",\"countyId\":\"ZJ\",\"isp\":\"Chinanet\",\"ispId\":4134,\"ip\":\"115.204.150.34\",\"geoPoint\":{\"lon\":120.1619,\"lat\":30.294}}","content":"admin(系统管理员) 登陆[内容管理系统平台]"}
+		 {"collecttime":1588864468000,"optime":1522163574000,"author":"duoduo","subtitle":"小康","name":"认证管理","oper":"admin","id":269391,"title":"解放","ipinfo":"{\"country\":\"中国\",\"countryId\":\"CN\",\"area\":\"\",\"areaId\":\"\",\"region\":\"浙江省\",\"regionId\":\"ZJ\",\"city\":\"杭州\",\"cityId\":\"\",\"county\":\"浙江省\",\"countyId\":\"ZJ\",\"isp\":\"Chinanet\",\"ispId\":4134,\"ip\":\"115.204.150.34\",\"geoPoint\":{\"lon\":120.1619,\"lat\":30.294}}","content":"admin(系统管理员) 退出[公共开发平台]"}
+		 {"collecttime":1588864468000,"optime":1480349157000,"author":"duoduo","subtitle":"小康","name":"机构管理","oper":"admin","id":269392,"title":"解放","ipinfo":"{\"country\":\"中国\",\"countryId\":\"CN\",\"area\":\"\",\"areaId\":\"\",\"region\":\"浙江省\",\"regionId\":\"ZJ\",\"city\":\"杭州\",\"cityId\":\"\",\"county\":\"浙江省\",\"countyId\":\"ZJ\",\"isp\":\"Chinanet\",\"ispId\":4134,\"ip\":\"115.204.150.34\",\"geoPoint\":{\"lon\":120.1619,\"lat\":30.294}}","content":"系统管理员新增子机构3eqr"}
+		 {"collecttime":1588864467000,"optime":1520869926000,"author":"duoduo","subtitle":"小康","name":"认证管理","oper":"admin","id":269393,"title":"解放","ipinfo":"{\"country\":\"中国\",\"countryId\":\"CN\",\"area\":\"\",\"areaId\":\"\",\"region\":\"浙江省\",\"regionId\":\"ZJ\",\"city\":\"杭州\",\"cityId\":\"\",\"county\":\"浙江省\",\"countyId\":\"ZJ\",\"isp\":\"Chinanet\",\"ispId\":4134,\"ip\":\"115.204.150.34\",\"geoPoint\":{\"lon\":120.1619,\"lat\":30.294}}","content":"admin(系统管理员) 登陆[内容管理系统平台]"}
+		 {"collecttime":1588864468000,"optime":1520860610000,"author":"duoduo","subtitle":"小康","name":"认证管理","oper":"admin","id":269394,"title":"解放","ipinfo":"{\"country\":\"中国\",\"countryId\":\"CN\",\"area\":\"\",\"areaId\":\"\",\"region\":\"浙江省\",\"regionId\":\"ZJ\",\"city\":\"杭州\",\"cityId\":\"\",\"county\":\"浙江省\",\"countyId\":\"ZJ\",\"isp\":\"Chinanet\",\"ispId\":4134,\"ip\":\"115.204.150.34\",\"geoPoint\":{\"lon\":120.1619,\"lat\":30.294}}","content":"admin(系统管理员) 退出[公共开发平台]"}
+		 {"collecttime":1588864468000,"optime":1572536935000,"author":"duoduo","subtitle":"小康","name":"认证-管理","oper":"|admin","id":269395,"title":"解放","ipinfo":"{\"country\":\"中国\",\"countryId\":\"CN\",\"area\":\"\",\"areaId\":\"\",\"region\":\"浙江省\",\"regionId\":\"ZJ\",\"city\":\"杭州\",\"cityId\":\"\",\"county\":\"浙江省\",\"countyId\":\"ZJ\",\"isp\":\"Chinanet\",\"ispId\":4134,\"ip\":\"115.204.150.34\",\"geoPoint\":{\"lon\":120.1619,\"lat\":30.294}}","content":"admin(系统管理员) 登陆[公共开发平台]"}
+		 {"collecttime":1588864467000,"optime":1520869054000,"author":"duoduo","subtitle":"小康","name":"站点管理","oper":"admin","id":269396,"title":"解放","ipinfo":"{\"country\":\"中国\",\"countryId\":\"CN\",\"area\":\"\",\"areaId\":\"\",\"region\":\"浙江省\",\"regionId\":\"ZJ\",\"city\":\"杭州\",\"cityId\":\"\",\"county\":\"浙江省\",\"countyId\":\"ZJ\",\"isp\":\"Chinanet\",\"ispId\":4134,\"ip\":\"115.204.150.34\",\"geoPoint\":{\"lon\":120.1619,\"lat\":30.294}}","content":"创建站点.站点名:test"}
+		 {"collecttime":1588864468000,"optime":1478092711000,"author":"duoduo","subtitle":"小康","name":"认证管理","oper":"admin","id":269397,"title":"解放","ipinfo":"{\"country\":\"中国\",\"countryId\":\"CN\",\"area\":\"\",\"areaId\":\"\",\"region\":\"浙江省\",\"regionId\":\"ZJ\",\"city\":\"杭州\",\"cityId\":\"\",\"county\":\"浙江省\",\"countyId\":\"ZJ\",\"isp\":\"Chinanet\",\"ispId\":4134,\"ip\":\"115.204.150.34\",\"geoPoint\":{\"lon\":120.1619,\"lat\":30.294}}","content":"admin(系统管理员) 登陆[公共开发平台]"}
+
+		 */
 		// kafka服务器参数配置
 		// kafka 2x 客户端参数项及说明类：org.apache.kafka.clients.consumer.ConsumerConfig
 		importBuilder//.addKafkaConfig("value.deserializer","org.apache.kafka.common.serialization.StringDeserializer")
@@ -229,15 +243,15 @@ public class Kafka2DBdemo {
 //					context.setDrop(true);
 //					return;
 //				}
-				if(s.incrementAndGet() % 3 == 2) {
-					context.markRecoredInsert();
-				}
-				else if(s.incrementAndGet() % 3 == 1){
-					context.markRecoredUpdate();
-				}
-				else{
-					context.markRecoredDelete();
-				}
+//				if(s.incrementAndGet() % 3 == 2) {
+//					context.markRecoredInsert();
+//				}
+//				else if(s.incrementAndGet() % 3 == 1){
+//					context.markRecoredUpdate();
+//				}
+//				else{
+//					context.markRecoredDelete();
+//				}
 				/**
 				 String name =  context.getStringValue("name");
 				 Integer num = SQLExecutor.queryObjectWithDBName(Integer.class,"firstds","select count(*) from batchtest1 where name = ?",name);//判断目标数据库表中是否已经存在name对应的记录
@@ -279,7 +293,8 @@ public class Kafka2DBdemo {
 //				Date optime = context.getDateValue("LOG_OPERTIME",dateFormat);
 //				context.addFieldValue("logOpertime",optime);
 				context.addFieldValue("collecttime",new Date());
-
+				long optime = context.getLongValue("optime");
+				context.addFieldValue("optime",new Date(optime));
 				/**
 				 //关联查询数据,单值查询
 				 Map headdata = SQLExecutor.queryObjectWithDBName(Map.class,context.getEsjdbc().getDbConfig().getDbName(),
