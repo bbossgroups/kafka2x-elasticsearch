@@ -24,6 +24,7 @@ import org.frameworkset.tran.context.Context;
 import org.frameworkset.tran.kafka.KafkaImportConfig;
 import org.frameworkset.tran.kafka.KafkaMapRecord;
 import org.frameworkset.tran.kafka.input.es.Kafka2ESExportBuilder;
+import org.frameworkset.tran.metrics.TaskMetrics;
 import org.frameworkset.tran.task.TaskCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -116,7 +117,7 @@ public class Kafka2ESdemo {
 				.addKafkaConfig("auto.commit.interval.ms","5000")
 				.addKafkaConfig("auto.offset.reset","latest")
 //				.addKafkaConfig("bootstrap.servers","192.168.137.133:9093")
-				.addKafkaConfig("bootstrap.servers","10.19.85.65:19092")
+				.addKafkaConfig("bootstrap.servers","10.13.11.12:9092")
 				.addKafkaConfig("enable.auto.commit","true")
 				.addKafkaConfig("max.poll.records","500") // The maximum number of records returned in a single call to poll().
 				.setKafkaTopic("xinkonglog") // kafka topic
@@ -242,6 +243,8 @@ public class Kafka2ESdemo {
 		importBuilder.setExportResultHandler(new ExportResultHandler<String,String>() {
 			@Override
 			public void success(TaskCommand<String,String> taskCommand, String result) {
+				TaskMetrics taskMetric = taskCommand.getTaskMetrics();
+				System.out.println("处理耗时："+taskCommand.getElapsed() +"毫秒");
 				System.out.println(taskCommand.getTaskMetrics());
 			}
 

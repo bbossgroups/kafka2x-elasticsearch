@@ -142,7 +142,7 @@ public class Kafka2DBdemo {
 		// kafka 2x 客户端参数项及说明类：org.apache.kafka.clients.consumer.ConsumerConfig
 		importBuilder//.addKafkaConfig("value.deserializer","org.apache.kafka.common.serialization.StringDeserializer")
 				//.addKafkaConfig("key.deserializer","org.apache.kafka.common.serialization.LongDeserializer")
-				.addKafkaConfig("group.id","trantest") // 消费组ID
+				.addKafkaConfig("group.id","trandbtest") // 消费组ID
 				.addKafkaConfig("session.timeout.ms","30000")
 				.addKafkaConfig("auto.commit.interval.ms","5000")
 				.addKafkaConfig("auto.offset.reset","latest")
@@ -325,8 +325,6 @@ public class Kafka2DBdemo {
 //		importBuilder.setDebugResponse(false);//设置是否将每次处理的reponse打印到日志文件中，默认false，不打印响应报文将大大提升性能，只有在调试需要的时候才打开，log日志级别同时要设置为INFO
 //		importBuilder.setDiscardBulkResponse(true);//设置是否需要批量处理的响应报文，不需要设置为false，true为需要，默认true，如果不需要响应报文将大大提升处理速度
 
-		importBuilder.setDebugResponse(false);//设置是否将每次处理的reponse打印到日志文件中，默认false
-		importBuilder.setDiscardBulkResponse(false);//设置是否需要批量处理的响应报文，不需要设置为false，true为需要，默认false
 		importBuilder.setExportResultHandler(new ExportResultHandler<String,String>() {
 			@Override
 			public void success(TaskCommand<String,String> taskCommand, String result) {
