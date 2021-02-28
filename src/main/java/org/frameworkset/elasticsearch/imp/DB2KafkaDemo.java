@@ -40,7 +40,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
- * <p>Description: 同步处理程序，如需调试同步功能，直接运行main方法</p>
+ * <p>Description: 导出关系数据库数据并发送kafka同步作业程序，如需调试同步功能，直接运行main方法</p>
  * <p></p>
  * <p>Copyright (c) 2018</p>
  * @Date 2018/9/27 20:38
@@ -317,10 +317,10 @@ public class DB2KafkaDemo {
 		importBuilder.setPrintTaskLog(true);
 
 		/**
-		 * 启动es数据导入文件并上传sftp/ftp作业
+		 * 构建和启动导出关系数据库数据并发送kafka同步作业
 		 */
 		DataStream dataStream = importBuilder.builder();
-		dataStream.execute();//启动同步作业
+		dataStream.execute();
 
 	}
 
