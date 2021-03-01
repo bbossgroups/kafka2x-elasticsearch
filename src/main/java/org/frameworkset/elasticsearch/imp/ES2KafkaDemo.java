@@ -16,9 +16,9 @@ package org.frameworkset.elasticsearch.imp;
  */
 
 
-import com.frameworkset.util.SimpleStringUtil;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.frameworkset.elasticsearch.serial.SerialUtil;
+import org.frameworkset.spi.geoip.IpInfo;
 import org.frameworkset.tran.CommonRecord;
 import org.frameworkset.tran.DataRefactor;
 import org.frameworkset.tran.DataStream;
@@ -36,10 +36,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Writer;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Map;
 
 /**
  * <p>Description: 导出elasticsearch数据并发送kafka同步作业，如需调试同步功能，直接运行main方法</p>
@@ -253,7 +251,10 @@ public class ES2KafkaDemo {
 //		importBuilder.addFieldMapping("logContent","LOG_CONTENT");
 //		importBuilder.addFieldMapping("logOperuser","LOG_OPERUSER");
 
-
+		//设置ip地址信息库地址
+		importBuilder.setGeoipDatabase("E:/workspace/hnai/terminal/geolite2/GeoLite2-City.mmdb");
+		importBuilder.setGeoipAsnDatabase("E:/workspace/hnai/terminal/geolite2/GeoLite2-ASN.mmdb");
+		importBuilder.setGeoip2regionDatabase("E:/workspace/hnai/terminal/geolite2/ip2region.db");
 		/**
 		 * 重新设置es数据结构
 		 */
@@ -281,13 +282,16 @@ public class ES2KafkaDemo {
 				/**
 				 * 获取ip对应的运营商和区域信息
 				 */
-				Map ipInfo = (Map)context.getValue("ipInfo");
+				/**
+				 * 获取ip对应的运营商和区域信息
+				 */
+				IpInfo ipInfo = (IpInfo) context.getIpInfo("logVisitorial");
 				if(ipInfo != null)
-					context.addFieldValue("ipinfo", SimpleStringUtil.object2json(ipInfo));
+					context.addFieldValue("ipinfo", ipInfo);
 				else{
 					context.addFieldValue("ipinfo", "");
 				}
-				DateFormat dateFormat = SerialUtil.getDateFormateMeta().toDateFormat();
+//				DateFormat dateFormat = SerialUtil.getDateFormateMeta().toDateFormat();
 //				Date optime = context.getDateValue("LOG_OPERTIME",dateFormat);
 //				context.addFieldValue("logOpertime",optime);
 				context.addFieldValue("newcollecttime",new Date());
@@ -334,7 +338,6 @@ public class ES2KafkaDemo {
 		});
 
 		importBuilder.setContinueOnError(true);//任务出现异常，是否继续执行作业：true（默认值）继续执行 false 中断作业执行
-		importBuilder.setAsyn(false);//true 异步方式执行，不等待所有导入作业任务结束，方法快速返回；false（默认值） 同步方式执行，等待所有导入作业任务结束，所有作业结束后方法才返回
 		importBuilder.setPrintTaskLog(true);
 
 		/**
