@@ -51,9 +51,8 @@ public class DB2KafkaDemo {
 	private static Logger logger = LoggerFactory.getLogger(DB2KafkaDemo.class);
 	public static void main(String args[]){
 		DB2KafkaDemo dbdemo = new DB2KafkaDemo();
-		boolean dropIndice = true;//CommonLauncher.getBooleanAttribute("dropIndice",false);//同时指定了默认值
 
-		dbdemo.scheduleTimestampImportData(dropIndice);
+		dbdemo.scheduleTimestampImportData();
 	}
 
 
@@ -61,7 +60,7 @@ public class DB2KafkaDemo {
 	/**
 	 * elasticsearch地址和数据库地址都从外部配置文件application.properties中获取，加载数据源配置和es配置
 	 */
-	public void scheduleTimestampImportData(boolean dropIndice){
+	public void scheduleTimestampImportData(){
 		DB2KafkaExportBuilder importBuilder = new DB2KafkaExportBuilder();
 //		importBuilder.setFetchSize(300);
 		//kafka相关配置参数
