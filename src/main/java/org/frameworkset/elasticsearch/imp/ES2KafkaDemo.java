@@ -131,7 +131,7 @@ public class ES2KafkaDemo {
 		// kafka服务器参数配置
 		// kafka 2x 客户端参数项及说明类：org.apache.kafka.clients.consumer.ConsumerConfig
 		KafkaOutputConfig kafkaOutputConfig = new KafkaOutputConfig();
-		kafkaOutputConfig.setTopic("es2kafka");
+		kafkaOutputConfig.setTopic("es2kafka");//设置kafka主题名称
 		kafkaOutputConfig.addKafkaProperty("value.serializer","org.apache.kafka.common.serialization.StringSerializer");
 		kafkaOutputConfig.addKafkaProperty("key.serializer","org.apache.kafka.common.serialization.LongSerializer");
 		kafkaOutputConfig.addKafkaProperty("compression.type","gzip");
@@ -144,8 +144,9 @@ public class ES2KafkaDemo {
 		kafkaOutputConfig.setReocordGenerator(new ReocordGenerator() {
 			@Override
 			public void buildRecord(Context taskContext, CommonRecord record, Writer builder) {
+				//record.setRecordKey("xxxxxx"); //指定记录key
 				//直接将记录按照json格式输出到文本文件中
-				SerialUtil.normalObject2json(record.getDatas(),//获取记录中的字段数据
+				SerialUtil.normalObject2json(record.getDatas(),//获取记录中的字段数据并转换为json格式
 						builder);
 				String data = (String)taskContext.getTaskContext().getTaskData("data");//从任务上下文中获取本次任务执行前设置时间戳
 //          System.out.println(data);
