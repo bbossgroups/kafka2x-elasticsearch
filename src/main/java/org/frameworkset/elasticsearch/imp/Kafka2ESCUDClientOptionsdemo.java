@@ -141,8 +141,8 @@ public class Kafka2ESCUDClientOptionsdemo {
 				.setPrintTaskLog(true) //可选项，true 打印任务执行日志（耗时，处理记录数） false 不打印，默认值false
 				.setBatchSize(100)  //可选项,批量导入es的记录数，默认为-1，逐条处理，> 0时批量处理
 				.setFetchSize(100); //按批从kafka拉取数据的大小
-		//异步消费数据时，强制刷新检测空闲时间间隔，在空闲flushInterval后，还没有数据到来，强制将已经入列的数据进行存储操作
-		importBuilder.setFlushInterval(10000);
+		//设置强制刷新检测空闲时间间隔，单位：毫秒，在空闲flushInterval后，还没有数据到来，强制将已经入列的数据进行存储操作，默认8秒,为0时关闭本机制
+		importBuilder.setFlushInterval(10000l);
 
 //
 //		//设置任务执行拦截器，可以添加多个，定时任务每次执行的拦截器

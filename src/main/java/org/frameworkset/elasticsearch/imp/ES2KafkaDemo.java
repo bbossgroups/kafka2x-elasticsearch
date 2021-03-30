@@ -17,6 +17,9 @@ package org.frameworkset.elasticsearch.imp;
 
 
 import org.apache.kafka.clients.producer.RecordMetadata;
+import org.frameworkset.elasticsearch.ElasticSearchHelper;
+import org.frameworkset.elasticsearch.client.ClientInterface;
+import org.frameworkset.elasticsearch.entity.IndexField;
 import org.frameworkset.elasticsearch.serial.SerialUtil;
 import org.frameworkset.spi.geoip.IpInfo;
 import org.frameworkset.tran.CommonRecord;
@@ -38,6 +41,7 @@ import org.slf4j.LoggerFactory;
 import java.io.Writer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 /**
  * <p>Description: 导出elasticsearch数据并发送kafka同步作业，如需调试同步功能，直接运行main方法</p>
@@ -50,6 +54,14 @@ import java.util.Date;
 public class ES2KafkaDemo {
 	private static Logger logger = LoggerFactory.getLogger(ES2KafkaDemo.class);
 	public static void main(String args[]){
+		ClientInterface clientInterface = ElasticSearchHelper.getRestClientUtil();
+		boolean uper7 = clientInterface.isVersionUpper7();
+		if(uper7) {
+			List<IndexField> indexFields = clientInterface.getIndexMappingFields("dbdemo");
+		}
+		else{
+			List<IndexField> indexFields = clientInterface.getIndexMappingFields("dbdemo","typename");
+		}
 		ES2KafkaDemo dbdemo = new ES2KafkaDemo();
 
 		dbdemo.scheduleTimestampImportData();
