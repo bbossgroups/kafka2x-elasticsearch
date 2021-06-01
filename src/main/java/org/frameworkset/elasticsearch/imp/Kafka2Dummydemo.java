@@ -16,17 +16,21 @@ package org.frameworkset.elasticsearch.imp;
  */
 
 
+import com.frameworkset.util.SimpleStringUtil;
+import org.frameworkset.tran.CommonRecord;
 import org.frameworkset.tran.DataRefactor;
 import org.frameworkset.tran.DataStream;
 import org.frameworkset.tran.ExportResultHandler;
 import org.frameworkset.tran.context.Context;
-import org.frameworkset.tran.db.DBConfigBuilder;
 import org.frameworkset.tran.kafka.KafkaImportConfig;
-import org.frameworkset.tran.kafka.input.db.Kafka2DBExportBuilder;
+import org.frameworkset.tran.kafka.input.dummy.Kafka2DummyExportBuilder;
+import org.frameworkset.tran.ouput.dummy.DummyOupputConfig;
 import org.frameworkset.tran.task.TaskCommand;
+import org.frameworkset.tran.util.RecordGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Writer;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -38,7 +42,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author biaoping.yin
  * @version 1.0
  */
-public class Kafka2DBdemo {
+public class Kafka2Dummydemo {
 	private static Logger logger = LoggerFactory.getLogger(Kafka2Dummydemo.class);
 	public static void main(String args[]){
 		Kafka2Dummydemo dbdemo = new Kafka2Dummydemo();
@@ -53,34 +57,10 @@ public class Kafka2DBdemo {
 	 * elasticsearch地址和数据库地址都从外部配置文件application.properties中获取，加载数据源配置和es配置
 	 */
 	public void scheduleTimestampImportData(boolean dropIndice){
-		Kafka2DBExportBuilder importBuilder = new Kafka2DBExportBuilder();
+		Kafka2DummyExportBuilder importBuilder = new Kafka2DummyExportBuilder();
 
-		//导出到数据源配置
-		DBConfigBuilder dbConfigBuilder = new DBConfigBuilder();
-		dbConfigBuilder
-				.setSqlFilepath("sql-dbtran.xml")
 
-				.setTargetDbName("testds")//指定目标数据库，在application.properties文件中配置
-//				.setTargetDbDriver("com.mysql.jdbc.Driver") //数据库驱动程序，必须导入相关数据库的驱动jar包
-//				.setTargetDbUrl("jdbc:mysql://localhost:3306/bboss?useCursorFetch=true") //通过useCursorFetch=true启用mysql的游标fetch机制，否则会有严重的性能隐患，useCursorFetch必须和jdbcFetchSize参数配合使用，否则不会生效
-//				.setTargetDbUser("root")
-//				.setTargetDbPassword("123456")
-//				.setTargetValidateSQL("select 1")
-//				.setTargetUsePool(true)//是否使用连接池
-				.setInsertSqlName("insertSql")//指定新增的sql语句名称，在配置文件中配置：sql-dbtran.xml
-				.setUpdateSqlName("updateSql")//指定修改的sql语句名称，在配置文件中配置：sql-dbtran.xml
-				.setDeleteSqlName("deleteSql")//指定删除的sql语句名称，在配置文件中配置：sql-dbtran.xml
-				/**
-				 * 是否在批处理时，将insert、update、delete记录分组排序
-				 * true：分组排序，先执行insert、在执行update、最后执行delete操作
-				 * false：按照原始顺序执行db操作，默认值false
-				 * @param optimize
-				 * @return
-				 */
-				.setOptimize(true);//指定查询源库的sql语句，在配置文件中配置：sql-dbtran.xml
-		importBuilder.setOutputDBConfig(dbConfigBuilder.buildDBImportConfig());
-		importBuilder.setUseLowcase(false)  //可选项，true 列名称转小写，false列名称不转换小写，默认false，只要在UseJavaName为false的情况下，配置才起作用
-				.setPrintTaskLog(true); //可选项，true 打印任务执行日志（耗时，处理记录数） false 不打印，默认值false
+		importBuilder.setPrintTaskLog(true); //可选项，true 打印任务执行日志（耗时，处理记录数） false 不打印，默认值false
 
 
 
@@ -150,7 +130,7 @@ public class Kafka2DBdemo {
 				.addKafkaConfig("bootstrap.servers","10.13.11.12:9092")
 				.addKafkaConfig("enable.auto.commit","true")
 				.addKafkaConfig("max.poll.records","500") // The maximum number of records returned in a single call to poll().
-				.setKafkaTopic("xinkonglog") // kafka topic
+				.setKafkaTopic("es2kafka") // kafka topic
 				.setConsumerThreads(5) // 并行消费线程数，建议与topic partitions数一致
 				.setKafkaWorkQueue(10)
 				.setKafkaWorkThreads(2)
@@ -161,15 +141,16 @@ public class Kafka2DBdemo {
 				.setKeyCodec(KafkaImportConfig.CODEC_LONG);
 
 
-//		importBuilder.addIgnoreFieldMapping("remark1");
-//		importBuilder.setSql("select * from td_sm_log ");
-		/**
-		 * es相关配置
-		 */
-		importBuilder
+		DummyOupputConfig dummyOupputConfig = new DummyOupputConfig();
+		dummyOupputConfig.setRecordGenerator(new RecordGenerator() {
+			@Override
+			public void buildRecord(Context taskContext, CommonRecord record, Writer builder) throws Exception{
+				SimpleStringUtil.object2json(record.getDatas(),builder);
 
-				.setPrintTaskLog(true) //可选项，true 打印任务执行日志（耗时，处理记录数） false 不打印，默认值false
-				.setBatchSize(100) ; //可选项,批量导入es的记录数，默认为-1，逐条处理，> 0时批量处理
+			}
+		}).setPrintRecord(true);
+		importBuilder.setDummyOupputConfig(dummyOupputConfig);
+
 //				.setFetchSize(100); //按批从kafka拉取数据的大小，设置了max.poll.records就不要设施FetchSize
 		//设置强制刷新检测空闲时间间隔，单位：毫秒，在空闲flushInterval后，还没有数据到来，强制将已经入列的数据进行存储操作，默认8秒,为0时关闭本机制
 		importBuilder.setFlushInterval(10000l);

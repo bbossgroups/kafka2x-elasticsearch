@@ -16,35 +16,43 @@ package org.frameworkset.elasticsearch.imp;
  */
 
 
+import org.frameworkset.elasticsearch.serial.SerialUtil;
+import org.frameworkset.runtime.CommonLauncher;
+import org.frameworkset.tran.CommonRecord;
 import org.frameworkset.tran.DataRefactor;
 import org.frameworkset.tran.DataStream;
 import org.frameworkset.tran.ExportResultHandler;
 import org.frameworkset.tran.context.Context;
-import org.frameworkset.tran.db.DBConfigBuilder;
 import org.frameworkset.tran.kafka.KafkaImportConfig;
-import org.frameworkset.tran.kafka.input.db.Kafka2DBExportBuilder;
+import org.frameworkset.tran.kafka.input.fileftp.Kafka2FileFtpExportBuilder;
+import org.frameworkset.tran.metrics.TaskMetrics;
+import org.frameworkset.tran.output.fileftp.FileFtpOupputConfig;
+import org.frameworkset.tran.output.fileftp.FilenameGenerator;
+import org.frameworkset.tran.schedule.TaskContext;
 import org.frameworkset.tran.task.TaskCommand;
+import org.frameworkset.tran.util.RecordGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Writer;
+import java.text.DateFormat;
 import java.util.Date;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * <p>Description: 同步处理程序，如需调试同步功能，直接运行main方法</p>
+ * <p>Description: 采集日志文件数据并发送kafka作业，如需调试同步功能，直接运行main方法</p>
  * <p></p>
  * <p>Copyright (c) 2018</p>
  * @Date 2018/9/27 20:38
  * @author biaoping.yin
  * @version 1.0
  */
-public class Kafka2DBdemo {
-	private static Logger logger = LoggerFactory.getLogger(Kafka2Dummydemo.class);
+public class Kafka2FileFtpDemo {
+	private static Logger logger = LoggerFactory.getLogger(Kafka2FileFtpDemo.class);
 	public static void main(String args[]){
-		Kafka2Dummydemo dbdemo = new Kafka2Dummydemo();
-		boolean dropIndice = true;//CommonLauncher.getBooleanAttribute("dropIndice",false);//同时指定了默认值
 
-		dbdemo.scheduleTimestampImportData(dropIndice);
+		Kafka2FileFtpDemo dbdemo = new Kafka2FileFtpDemo();
+
+		dbdemo.scheduleTimestampImportData();
 	}
 
 
@@ -52,38 +60,41 @@ public class Kafka2DBdemo {
 	/**
 	 * elasticsearch地址和数据库地址都从外部配置文件application.properties中获取，加载数据源配置和es配置
 	 */
-	public void scheduleTimestampImportData(boolean dropIndice){
-		Kafka2DBExportBuilder importBuilder = new Kafka2DBExportBuilder();
-
-		//导出到数据源配置
-		DBConfigBuilder dbConfigBuilder = new DBConfigBuilder();
-		dbConfigBuilder
-				.setSqlFilepath("sql-dbtran.xml")
-
-				.setTargetDbName("testds")//指定目标数据库，在application.properties文件中配置
-//				.setTargetDbDriver("com.mysql.jdbc.Driver") //数据库驱动程序，必须导入相关数据库的驱动jar包
-//				.setTargetDbUrl("jdbc:mysql://localhost:3306/bboss?useCursorFetch=true") //通过useCursorFetch=true启用mysql的游标fetch机制，否则会有严重的性能隐患，useCursorFetch必须和jdbcFetchSize参数配合使用，否则不会生效
-//				.setTargetDbUser("root")
-//				.setTargetDbPassword("123456")
-//				.setTargetValidateSQL("select 1")
-//				.setTargetUsePool(true)//是否使用连接池
-				.setInsertSqlName("insertSql")//指定新增的sql语句名称，在配置文件中配置：sql-dbtran.xml
-				.setUpdateSqlName("updateSql")//指定修改的sql语句名称，在配置文件中配置：sql-dbtran.xml
-				.setDeleteSqlName("deleteSql")//指定删除的sql语句名称，在配置文件中配置：sql-dbtran.xml
-				/**
-				 * 是否在批处理时，将insert、update、delete记录分组排序
-				 * true：分组排序，先执行insert、在执行update、最后执行delete操作
-				 * false：按照原始顺序执行db操作，默认值false
-				 * @param optimize
-				 * @return
-				 */
-				.setOptimize(true);//指定查询源库的sql语句，在配置文件中配置：sql-dbtran.xml
-		importBuilder.setOutputDBConfig(dbConfigBuilder.buildDBImportConfig());
-		importBuilder.setUseLowcase(false)  //可选项，true 列名称转小写，false列名称不转换小写，默认false，只要在UseJavaName为false的情况下，配置才起作用
-				.setPrintTaskLog(true); //可选项，true 打印任务执行日志（耗时，处理记录数） false 不打印，默认值false
+	public void scheduleTimestampImportData(){
+		Kafka2FileFtpExportBuilder importBuilder = new Kafka2FileFtpExportBuilder();
+		importBuilder.setBatchSize(500).setFetchSize(1000);
 
 
+		String ftpIp = CommonLauncher.getProperty("ftpIP","10.13.6.127");//同时指定了默认值
+		FileFtpOupputConfig fileFtpOupputConfig = new FileFtpOupputConfig();
+		fileFtpOupputConfig.setBackupSuccessFiles(true);
+		fileFtpOupputConfig.setTransferEmptyFiles(true);
+		fileFtpOupputConfig.setFtpIP(ftpIp);
+		fileFtpOupputConfig.setFileDir("D:\\workdir");
+		fileFtpOupputConfig.setFtpPort(5322);
+		fileFtpOupputConfig.addHostKeyVerifier("2a:da:5a:6a:cf:7d:65:e5:ac:ff:d3:73:7f:2c:55:c9");
+		fileFtpOupputConfig.setFtpUser("ecs");
+		fileFtpOupputConfig.setFtpPassword("ecs@123");
+		fileFtpOupputConfig.setRemoteFileDir("/home/ecs/failLog");
+		fileFtpOupputConfig.setKeepAliveTimeout(100000);
+		fileFtpOupputConfig.setFailedFileResendInterval(100000);
+		fileFtpOupputConfig.setMaxFileRecordSize(10);
+		fileFtpOupputConfig.setFilenameGenerator(new FilenameGenerator() {
+			@Override
+			public String genName(TaskContext taskContext, int fileSeq) {
 
+
+				return "HN_BOSS_TRADE_"+fileSeq + ".txt";
+			}
+		});
+		fileFtpOupputConfig.setRecordGenerator(new RecordGenerator() {
+			@Override
+			public void buildRecord(Context taskContext, CommonRecord record, Writer builder) {
+				SerialUtil.normalObject2json(record.getDatas(),builder);
+
+			}
+		});
+		importBuilder.setFileFtpOupputConfig(fileFtpOupputConfig);
 		//kafka相关配置参数
 		/**
 		 *
@@ -150,7 +161,7 @@ public class Kafka2DBdemo {
 				.addKafkaConfig("bootstrap.servers","10.13.11.12:9092")
 				.addKafkaConfig("enable.auto.commit","true")
 				.addKafkaConfig("max.poll.records","500") // The maximum number of records returned in a single call to poll().
-				.setKafkaTopic("xinkonglog") // kafka topic
+				.setKafkaTopic("es2kafka") // kafka topic
 				.setConsumerThreads(5) // 并行消费线程数，建议与topic partitions数一致
 				.setKafkaWorkQueue(10)
 				.setKafkaWorkThreads(2)
@@ -159,59 +170,20 @@ public class Kafka2DBdemo {
 				.setPollTimeOut(1000) // 从kafka consumer poll(timeout)参数
 				.setValueCodec(KafkaImportConfig.CODEC_JSON)
 				.setKeyCodec(KafkaImportConfig.CODEC_LONG);
-
-
-//		importBuilder.addIgnoreFieldMapping("remark1");
-//		importBuilder.setSql("select * from td_sm_log ");
-		/**
-		 * es相关配置
-		 */
-		importBuilder
-
-				.setPrintTaskLog(true) //可选项，true 打印任务执行日志（耗时，处理记录数） false 不打印，默认值false
-				.setBatchSize(100) ; //可选项,批量导入es的记录数，默认为-1，逐条处理，> 0时批量处理
-//				.setFetchSize(100); //按批从kafka拉取数据的大小，设置了max.poll.records就不要设施FetchSize
-		//设置强制刷新检测空闲时间间隔，单位：毫秒，在空闲flushInterval后，还没有数据到来，强制将已经入列的数据进行存储操作，默认8秒,为0时关闭本机制
 		importBuilder.setFlushInterval(10000l);
-
-//		//设置任务执行拦截器，可以添加多个，定时任务每次执行的拦截器
-//		importBuilder.addCallInterceptor(new CallInterceptor() {
-//			@Override
-//			public void preCall(TaskContext taskContext) {
-//				System.out.println("preCall");
-//			}
-//
-//			@Override
-//			public void afterCall(TaskContext taskContext) {
-//				System.out.println("afterCall");
-//			}
-//
-//			@Override
-//			public void throwException(TaskContext taskContext, Exception e) {
-//				System.out.println("throwException");
-//			}
-//		}).addCallInterceptor(new CallInterceptor() {
-//			@Override
-//			public void preCall(TaskContext taskContext) {
-//				System.out.println("preCall 1");
-//			}
-//
-//			@Override
-//			public void afterCall(TaskContext taskContext) {
-//				System.out.println("afterCall 1");
-//			}
-//
-//			@Override
-//			public void throwException(TaskContext taskContext, Exception e) {
-//				System.out.println("throwException 1");
-//			}
-//		});
-//		//设置任务执行拦截器结束，可以添加多个
+		importBuilder.setFromFirst(true);//setFromfirst(false)，如果作业停了，作业重启后从上次截止位置开始采集数据，
+		//setFromfirst(true) 如果作业停了，作业重启后，重新开始采集数据
+		importBuilder.setLastValueStorePath("filelog2ftp");//记录上次采集的增量字段值的文件路径，作为下次增量（或者重启后）采集数据的起点，不同的任务这个路径要不一样
+//		importBuilder.setLastValueStoreTableName("logs");//记录上次采集的增量字段值的表，可以不指定，采用默认表名increament_tab
+		// 或者ImportIncreamentConfig.TIMESTAMP_TYPE 日期类型
+		//指定增量同步的起始时间
+//		importBuilder.setLastValue(new Date());
+		//增量配置结束
 
 		//映射和转换配置开始
 //		/**
 //		 * db-es mapping 表字段名称到es 文档字段的映射：比如document_id -> docId
-//		 *
+//		 * 可以配置mapping，也可以不配置，默认基于java 驼峰规则进行db field-es field的映射和转换
 //		 */
 //		importBuilder.addFieldMapping("document_id","docId")
 //				.addFieldMapping("docwtime","docwTime")
@@ -230,11 +202,19 @@ public class Kafka2DBdemo {
 //		testObject.setId("testid");
 //		testObject.setName("jackson");
 //		importBuilder.addFieldValue("testObject",testObject);
-//
-//		/**
-//		 * 重新设置es数据结构
-//		 */
-		final AtomicInteger s = new AtomicInteger(0);
+		importBuilder.addFieldValue("author","张无忌");
+//		importBuilder.addFieldMapping("operModule","OPER_MODULE");
+//		importBuilder.addFieldMapping("logContent","LOG_CONTENT");
+//		importBuilder.addFieldMapping("logOperuser","LOG_OPERUSER");
+
+		//设置ip地址信息库地址
+		importBuilder.setGeoipDatabase("E:/workspace/hnai/terminal/geolite2/GeoLite2-City.mmdb");
+		importBuilder.setGeoipAsnDatabase("E:/workspace/hnai/terminal/geolite2/GeoLite2-ASN.mmdb");
+		importBuilder.setGeoip2regionDatabase("E:/workspace/hnai/terminal/geolite2/ip2region.db");
+
+		/**
+		 * 重新设置es数据结构
+		 */
 		importBuilder.setDataRefactor(new DataRefactor() {
 			public void refactor(Context context) throws Exception  {
 				//可以根据条件定义是否丢弃当前记录
@@ -243,58 +223,34 @@ public class Kafka2DBdemo {
 //					context.setDrop(true);
 //					return;
 //				}
-//				if(s.incrementAndGet() % 3 == 2) {
-//					context.markRecoredInsert();
-//				}
-//				else if(s.incrementAndGet() % 3 == 1){
-//					context.markRecoredUpdate();
-//				}
-//				else{
-//					context.markRecoredDelete();
-//				}
-				/**
-				 String name =  context.getStringValue("name");
-				 Integer num = SQLExecutor.queryObjectWithDBName(Integer.class,"firstds","select count(*) from batchtest1 where name = ?",name);//判断目标数据库表中是否已经存在name对应的记录
-				 if(num == null || num == 0){
-				 context.markRecoredInsert();//不存在，标记为新增
-				 }
-				 else{
-				 context.markRecoredUpdate();//存在，标记为修改
-				 context.addFieldValue("content","new ocntnent");//模拟调整修改content字段内容
-				 }
-				 //				context.markRecoredDelete(); //亦可以根据条件，将记录标记为删除
-				 */
+//				System.out.println(data);
 
-				context.addFieldValue("author","duoduo");
+//				context.addFieldValue("author","duoduo");//将会覆盖全局设置的author变量
 				context.addFieldValue("title","解放");
 				context.addFieldValue("subtitle","小康");
-				context.addFieldValue("collecttime",new Date());//
-//				Object password_lifetime = context.getValue("password_lifetime");
-//				if(password_lifetime == null){
-//					context.addFieldValue("password_lifetime", 0);
-//				}
+
+
 //				context.addIgnoreFieldMapping("title");
 				//上述三个属性已经放置到docInfo中，如果无需再放置到索引文档中，可以忽略掉这些属性
 //				context.addIgnoreFieldMapping("author");
 
 //				//修改字段名称title为新名称newTitle，并且修改字段的值
 //				context.newName2ndData("title","newTitle",(String)context.getValue("title")+" append new Value");
-//				context.addIgnoreFieldMapping("subtitle");
 				/**
 				 * 获取ip对应的运营商和区域信息
 				 */
-//				IpInfo ipInfo = context.getIpInfo("Host");
-//				if(ipInfo != null)
-//					context.addFieldValue("ipinfo", SimpleStringUtil.object2json(ipInfo));
-//				else{
-//					context.addFieldValue("ipinfo", "");
-//				}
-//				DateFormat dateFormat = SerialUtil.getDateFormateMeta().toDateFormat();
+				/**
+				 IpInfo ipInfo = (IpInfo) context.getIpInfo(fvs[2]);
+				 if(ipInfo != null)
+				 context.addFieldValue("ipinfo", ipInfo);
+				 else{
+				 context.addFieldValue("ipinfo", "");
+				 }*/
+				DateFormat dateFormat = SerialUtil.getDateFormateMeta().toDateFormat();
 //				Date optime = context.getDateValue("LOG_OPERTIME",dateFormat);
 //				context.addFieldValue("logOpertime",optime);
-				context.addFieldValue("collecttime",new Date());
-				long optime = context.getLongValue("optime");
-				context.addFieldValue("optime",new Date(optime));
+				context.addFieldValue("newcollecttime",new Date());
+
 				/**
 				 //关联查询数据,单值查询
 				 Map headdata = SQLExecutor.queryObjectWithDBName(Map.class,context.getEsjdbc().getDbConfig().getDbName(),
@@ -312,33 +268,22 @@ public class Kafka2DBdemo {
 			}
 		});
 		//映射和转换配置结束
-
-		/**
-		 * 一次、作业创建一个内置的线程池，实现多线程并行数据导入elasticsearch功能，作业完毕后关闭线程池
-		 */
-		importBuilder.setParallel(true);//设置为多线程并行批量导入,false串行
-		importBuilder.setQueue(10);//设置批量导入线程池等待队列长度
-		importBuilder.setThreadCount(50);//设置批量导入线程池工作线程数量
-		importBuilder.setContinueOnError(true);//任务出现异常，是否继续执行作业：true（默认值）继续执行 false 中断作业执行
-		importBuilder.setAsyn(false);//true 异步方式执行，不等待所有导入作业任务结束，方法快速返回；false（默认值） 同步方式执行，等待所有导入作业任务结束，所有作业结束后方法才返回
-		importBuilder.setEsIdField("_id");//设置文档主键，不设置，则自动产生文档id
-//		importBuilder.setDebugResponse(false);//设置是否将每次处理的reponse打印到日志文件中，默认false，不打印响应报文将大大提升性能，只有在调试需要的时候才打开，log日志级别同时要设置为INFO
-//		importBuilder.setDiscardBulkResponse(true);//设置是否需要批量处理的响应报文，不需要设置为false，true为需要，默认true，如果不需要响应报文将大大提升处理速度
-
 		importBuilder.setExportResultHandler(new ExportResultHandler<String,String>() {
 			@Override
 			public void success(TaskCommand<String,String> taskCommand, String result) {
-				System.out.println(taskCommand.getTaskMetrics());
+				TaskMetrics taskMetric = taskCommand.getTaskMetrics();
+				logger.debug("处理耗时："+taskCommand.getElapsed() +"毫秒");
+				logger.debug(taskCommand.getTaskMetrics().toString());
 			}
 
 			@Override
 			public void error(TaskCommand<String,String> taskCommand, String result) {
-				System.out.println(taskCommand.getTaskMetrics());
+				logger.warn(taskCommand.getTaskMetrics().toString());
 			}
 
 			@Override
 			public void exception(TaskCommand<String,String> taskCommand, Exception exception) {
-				System.out.println(taskCommand.getTaskMetrics());
+				logger.warn(taskCommand.getTaskMetrics().toString(),exception);
 			}
 
 			@Override
@@ -346,25 +291,16 @@ public class Kafka2DBdemo {
 				return 0;
 			}
 		});
-		/**
-		 importBuilder.setEsIdGenerator(new EsIdGenerator() {
-		 //如果指定EsIdGenerator，则根据下面的方法生成文档id，
-		 // 否则根据setEsIdField方法设置的字段值作为文档id，
-		 // 如果默认没有配置EsIdField和如果指定EsIdGenerator，则由es自动生成文档id
 
-		 @Override
-		 public Object genId(Context context) throws Exception {
-		 return SimpleStringUtil.getUUID();//返回null，则由es自动生成文档id
-		 }
-		 });
-		 */
+		importBuilder.setContinueOnError(true);//任务出现异常，是否继续执行作业：true（默认值）继续执行 false 中断作业执行
+		importBuilder.setPrintTaskLog(true);
+
 		/**
-		 * 构建DataStream，执行mongodb数据到es的同步操作
+		 * 构建和启动导出elasticsearch数据并发送kafka同步作业
 		 */
 		DataStream dataStream = importBuilder.builder();
-		dataStream.execute();//执行同步操作
+		dataStream.execute();
 
-		System.out.println();
 	}
 
 }

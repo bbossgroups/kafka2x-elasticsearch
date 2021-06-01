@@ -16,17 +16,22 @@ package org.frameworkset.elasticsearch.imp;
  */
 
 
+import org.apache.kafka.clients.producer.RecordMetadata;
+import org.frameworkset.elasticsearch.serial.SerialUtil;
+import org.frameworkset.tran.CommonRecord;
 import org.frameworkset.tran.DataRefactor;
 import org.frameworkset.tran.DataStream;
 import org.frameworkset.tran.ExportResultHandler;
 import org.frameworkset.tran.context.Context;
-import org.frameworkset.tran.db.DBConfigBuilder;
 import org.frameworkset.tran.kafka.KafkaImportConfig;
-import org.frameworkset.tran.kafka.input.db.Kafka2DBExportBuilder;
+import org.frameworkset.tran.kafka.output.KafkaOutputConfig;
+import org.frameworkset.tran.kafka.output.kafka.Kafka2KafkaExportBuilder;
 import org.frameworkset.tran.task.TaskCommand;
+import org.frameworkset.tran.util.RecordGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Writer;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -38,10 +43,10 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author biaoping.yin
  * @version 1.0
  */
-public class Kafka2DBdemo {
-	private static Logger logger = LoggerFactory.getLogger(Kafka2Dummydemo.class);
+public class Kafka2Kafkademo {
+	private static Logger logger = LoggerFactory.getLogger(Kafka2Kafkademo.class);
 	public static void main(String args[]){
-		Kafka2Dummydemo dbdemo = new Kafka2Dummydemo();
+		Kafka2Kafkademo dbdemo = new Kafka2Kafkademo();
 		boolean dropIndice = true;//CommonLauncher.getBooleanAttribute("dropIndice",false);//同时指定了默认值
 
 		dbdemo.scheduleTimestampImportData(dropIndice);
@@ -53,34 +58,10 @@ public class Kafka2DBdemo {
 	 * elasticsearch地址和数据库地址都从外部配置文件application.properties中获取，加载数据源配置和es配置
 	 */
 	public void scheduleTimestampImportData(boolean dropIndice){
-		Kafka2DBExportBuilder importBuilder = new Kafka2DBExportBuilder();
+		Kafka2KafkaExportBuilder importBuilder = new Kafka2KafkaExportBuilder();
 
-		//导出到数据源配置
-		DBConfigBuilder dbConfigBuilder = new DBConfigBuilder();
-		dbConfigBuilder
-				.setSqlFilepath("sql-dbtran.xml")
 
-				.setTargetDbName("testds")//指定目标数据库，在application.properties文件中配置
-//				.setTargetDbDriver("com.mysql.jdbc.Driver") //数据库驱动程序，必须导入相关数据库的驱动jar包
-//				.setTargetDbUrl("jdbc:mysql://localhost:3306/bboss?useCursorFetch=true") //通过useCursorFetch=true启用mysql的游标fetch机制，否则会有严重的性能隐患，useCursorFetch必须和jdbcFetchSize参数配合使用，否则不会生效
-//				.setTargetDbUser("root")
-//				.setTargetDbPassword("123456")
-//				.setTargetValidateSQL("select 1")
-//				.setTargetUsePool(true)//是否使用连接池
-				.setInsertSqlName("insertSql")//指定新增的sql语句名称，在配置文件中配置：sql-dbtran.xml
-				.setUpdateSqlName("updateSql")//指定修改的sql语句名称，在配置文件中配置：sql-dbtran.xml
-				.setDeleteSqlName("deleteSql")//指定删除的sql语句名称，在配置文件中配置：sql-dbtran.xml
-				/**
-				 * 是否在批处理时，将insert、update、delete记录分组排序
-				 * true：分组排序，先执行insert、在执行update、最后执行delete操作
-				 * false：按照原始顺序执行db操作，默认值false
-				 * @param optimize
-				 * @return
-				 */
-				.setOptimize(true);//指定查询源库的sql语句，在配置文件中配置：sql-dbtran.xml
-		importBuilder.setOutputDBConfig(dbConfigBuilder.buildDBImportConfig());
-		importBuilder.setUseLowcase(false)  //可选项，true 列名称转小写，false列名称不转换小写，默认false，只要在UseJavaName为false的情况下，配置才起作用
-				.setPrintTaskLog(true); //可选项，true 打印任务执行日志（耗时，处理记录数） false 不打印，默认值false
+		importBuilder.setPrintTaskLog(true); //可选项，true 打印任务执行日志（耗时，处理记录数） false 不打印，默认值false
 
 
 
@@ -138,7 +119,7 @@ public class Kafka2DBdemo {
 		 {"collecttime":1588864468000,"optime":1478092711000,"author":"duoduo","subtitle":"小康","name":"认证管理","oper":"admin","id":269397,"title":"解放","ipinfo":"{\"country\":\"中国\",\"countryId\":\"CN\",\"area\":\"\",\"areaId\":\"\",\"region\":\"浙江省\",\"regionId\":\"ZJ\",\"city\":\"杭州\",\"cityId\":\"\",\"county\":\"浙江省\",\"countyId\":\"ZJ\",\"isp\":\"Chinanet\",\"ispId\":4134,\"ip\":\"115.204.150.34\",\"geoPoint\":{\"lon\":120.1619,\"lat\":30.294}}","content":"admin(系统管理员) 登陆[公共开发平台]"}
 
 		 */
-		// kafka服务器参数配置
+		// kafka输入服务器参数配置
 		// kafka 2x 客户端参数项及说明类：org.apache.kafka.clients.consumer.ConsumerConfig
 		importBuilder//.addKafkaConfig("value.deserializer","org.apache.kafka.common.serialization.StringDeserializer")
 				//.addKafkaConfig("key.deserializer","org.apache.kafka.common.serialization.LongDeserializer")
@@ -150,7 +131,7 @@ public class Kafka2DBdemo {
 				.addKafkaConfig("bootstrap.servers","10.13.11.12:9092")
 				.addKafkaConfig("enable.auto.commit","true")
 				.addKafkaConfig("max.poll.records","500") // The maximum number of records returned in a single call to poll().
-				.setKafkaTopic("xinkonglog") // kafka topic
+				.setKafkaTopic("es2kafka") // kafka topic
 				.setConsumerThreads(5) // 并行消费线程数，建议与topic partitions数一致
 				.setKafkaWorkQueue(10)
 				.setKafkaWorkThreads(2)
@@ -161,16 +142,52 @@ public class Kafka2DBdemo {
 				.setKeyCodec(KafkaImportConfig.CODEC_LONG);
 
 
-//		importBuilder.addIgnoreFieldMapping("remark1");
-//		importBuilder.setSql("select * from td_sm_log ");
-		/**
-		 * es相关配置
-		 */
-		importBuilder
+		// kafka输出服务器参数配置
+		// kafka 2x 客户端参数项及说明类：org.apache.kafka.clients.consumer.ConsumerConfig
+		KafkaOutputConfig kafkaOutputConfig = new KafkaOutputConfig();
+		kafkaOutputConfig.setTopic("kafka2kafka");//设置kafka主题名称
+		kafkaOutputConfig.addKafkaProperty("value.serializer","org.apache.kafka.common.serialization.StringSerializer");
+		kafkaOutputConfig.addKafkaProperty("key.serializer","org.apache.kafka.common.serialization.LongSerializer");
+		kafkaOutputConfig.addKafkaProperty("compression.type","gzip");
+		kafkaOutputConfig.addKafkaProperty("bootstrap.servers","10.13.11.12:9092");
+		kafkaOutputConfig.addKafkaProperty("batch.size","10");
+//		kafkaOutputConfig.addKafkaProperty("linger.ms","10000");
+//		kafkaOutputConfig.addKafkaProperty("buffer.memory","10000");
+		kafkaOutputConfig.setKafkaAsynSend(true);
+//指定文件中每条记录格式，不指定默认为json格式输出
+		kafkaOutputConfig.setRecordGenerator(new RecordGenerator() {
+			@Override
+			public void buildRecord(Context taskContext, CommonRecord record, Writer builder) {
+				//record.setRecordKey("xxxxxx"); //指定记录key
+				//直接将记录按照json格式输出到文本文件中
+				SerialUtil.normalObject2json(record.getDatas(),//获取记录中的字段数据并转换为json格式
+						builder);
+//          System.out.println(data);
 
-				.setPrintTaskLog(true) //可选项，true 打印任务执行日志（耗时，处理记录数） false 不打印，默认值false
-				.setBatchSize(100) ; //可选项,批量导入es的记录数，默认为-1，逐条处理，> 0时批量处理
-//				.setFetchSize(100); //按批从kafka拉取数据的大小，设置了max.poll.records就不要设施FetchSize
+			}
+		});
+		importBuilder.setKafkaOutputConfig(kafkaOutputConfig);
+		importBuilder.setExportResultHandler(new ExportResultHandler<Object, RecordMetadata>() {
+			@Override
+			public void success(TaskCommand<Object, RecordMetadata> taskCommand, RecordMetadata result) {
+				System.out.println(taskCommand.getTaskMetrics());
+			}
+
+			@Override
+			public void error(TaskCommand<Object, RecordMetadata> taskCommand, RecordMetadata result) {
+				System.out.println(taskCommand.getTaskMetrics());
+			}
+
+			@Override
+			public void exception(TaskCommand<Object, RecordMetadata> taskCommand, Exception exception) {
+				System.out.println(taskCommand.getTaskMetrics());
+			}
+
+			@Override
+			public int getMaxRetry() {
+				return 0;
+			}
+		});
 		//设置强制刷新检测空闲时间间隔，单位：毫秒，在空闲flushInterval后，还没有数据到来，强制将已经入列的数据进行存储操作，默认8秒,为0时关闭本机制
 		importBuilder.setFlushInterval(10000l);
 
@@ -325,27 +342,7 @@ public class Kafka2DBdemo {
 //		importBuilder.setDebugResponse(false);//设置是否将每次处理的reponse打印到日志文件中，默认false，不打印响应报文将大大提升性能，只有在调试需要的时候才打开，log日志级别同时要设置为INFO
 //		importBuilder.setDiscardBulkResponse(true);//设置是否需要批量处理的响应报文，不需要设置为false，true为需要，默认true，如果不需要响应报文将大大提升处理速度
 
-		importBuilder.setExportResultHandler(new ExportResultHandler<String,String>() {
-			@Override
-			public void success(TaskCommand<String,String> taskCommand, String result) {
-				System.out.println(taskCommand.getTaskMetrics());
-			}
 
-			@Override
-			public void error(TaskCommand<String,String> taskCommand, String result) {
-				System.out.println(taskCommand.getTaskMetrics());
-			}
-
-			@Override
-			public void exception(TaskCommand<String,String> taskCommand, Exception exception) {
-				System.out.println(taskCommand.getTaskMetrics());
-			}
-
-			@Override
-			public int getMaxRetry() {
-				return 0;
-			}
-		});
 		/**
 		 importBuilder.setEsIdGenerator(new EsIdGenerator() {
 		 //如果指定EsIdGenerator，则根据下面的方法生成文档id，

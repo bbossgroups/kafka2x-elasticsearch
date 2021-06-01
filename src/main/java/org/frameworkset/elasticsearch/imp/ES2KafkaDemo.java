@@ -34,7 +34,7 @@ import org.frameworkset.tran.schedule.CallInterceptor;
 import org.frameworkset.tran.schedule.ImportIncreamentConfig;
 import org.frameworkset.tran.schedule.TaskContext;
 import org.frameworkset.tran.task.TaskCommand;
-import org.frameworkset.tran.util.ReocordGenerator;
+import org.frameworkset.tran.util.RecordGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -147,13 +147,15 @@ public class ES2KafkaDemo {
 		kafkaOutputConfig.addKafkaProperty("value.serializer","org.apache.kafka.common.serialization.StringSerializer");
 		kafkaOutputConfig.addKafkaProperty("key.serializer","org.apache.kafka.common.serialization.LongSerializer");
 		kafkaOutputConfig.addKafkaProperty("compression.type","gzip");
-		kafkaOutputConfig.addKafkaProperty("bootstrap.servers","192.168.137.133:9092");
+//		kafkaOutputConfig.addKafkaProperty("bootstrap.servers","192.168.137.133:9092");
+		kafkaOutputConfig.addKafkaProperty("bootstrap.servers","10.13.11.12:9092");
+
 		kafkaOutputConfig.addKafkaProperty("batch.size","10");
 //		kafkaOutputConfig.addKafkaProperty("linger.ms","10000");
 //		kafkaOutputConfig.addKafkaProperty("buffer.memory","10000");
 		kafkaOutputConfig.setKafkaAsynSend(true);
 //指定文件中每条记录格式，不指定默认为json格式输出
-		kafkaOutputConfig.setReocordGenerator(new ReocordGenerator() {
+		kafkaOutputConfig.setRecordGenerator(new RecordGenerator() {
 			@Override
 			public void buildRecord(Context taskContext, CommonRecord record, Writer builder) {
 				//record.setRecordKey("xxxxxx"); //指定记录key
@@ -226,7 +228,7 @@ public class ES2KafkaDemo {
 //		//设置任务执行拦截器结束，可以添加多个
 		//增量配置开始
 		importBuilder.setLastValueColumn("collecttime");//手动指定日期增量查询字段变量名称
-		importBuilder.setFromFirst(false);//setFromfirst(false)，如果作业停了，作业重启后从上次截止位置开始采集数据，
+		importBuilder.setFromFirst(true);//setFromfirst(false)，如果作业停了，作业重启后从上次截止位置开始采集数据，
 		//setFromfirst(true) 如果作业停了，作业重启后，重新开始采集数据
 		importBuilder.setLastValueStorePath("es2kafka");//记录上次采集的增量字段值的文件路径，作为下次增量（或者重启后）采集数据的起点，不同的任务这个路径要不一样
 //		importBuilder.setLastValueStoreTableName("logs");//记录上次采集的增量字段值的表，可以不指定，采用默认表名increament_tab
