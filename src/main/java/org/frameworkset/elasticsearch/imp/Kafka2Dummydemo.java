@@ -137,8 +137,8 @@ public class Kafka2Dummydemo {
 				.setCheckinterval(2000)   // 批量从kafka拉取数据，闲置时间间隔，如果在指定的时间间隔内，没有数据到达并且数据拉取队列中有数据，则强制将队列中的数据交给同步作业程序进行同步处理
 
 				.setPollTimeOut(1000) // 从kafka consumer poll(timeout)参数
-				.setValueCodec(KafkaImportConfig.CODEC_JSON)
-				.setKeyCodec(KafkaImportConfig.CODEC_LONG);
+				.setValueCodec(KafkaImportConfig.CODEC_JSON)//"org.apache.kafka.common.serialization.ByteArrayDeserializer"
+				.setKeyCodec(KafkaImportConfig.CODEC_LONG);//"org.apache.kafka.common.serialization.ByteArrayDeserializer"
 
 
 		DummyOupputConfig dummyOupputConfig = new DummyOupputConfig();
