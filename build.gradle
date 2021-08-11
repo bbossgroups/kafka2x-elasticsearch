@@ -150,6 +150,12 @@ configure(allprojects) { project ->
 		api ([group: 'org.apache.kafka', name: 'kafka-tools', version: "${kafka2x}", transitive: true],){
 			exclude group: 'log4j', module: 'log4j'
 			exclude group: 'org.slf4j', module: 'slf4j-log4j12'
+			exclude group: 'org.eclipse.jetty', module: 'jetty-server'
+
+			exclude group: 'org.eclipse.jetty', module: 'jetty-servlets'
+
+			exclude group: 'org.eclipse.jetty', module: 'jetty-servlet'
+			exclude group: 'org.glassfish.jersey.containers', module: 'jersey-container-servlet'
 		}
 
 		api ([group: 'org.apache.kafka', name: 'kafka-clients', version: "${kafka2x}", transitive: true],){
