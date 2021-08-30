@@ -272,7 +272,7 @@ public class Filelog2KafkaDemo {
 			public void preCall(TaskContext taskContext) {
 				//文件开始被采集前调用
 				FileTaskContext fileTaskContext = (FileTaskContext)taskContext;
-				FileReaderTask.FileInfo fileInfo = fileTaskContext.getFileInfo();
+				FileInfo fileInfo = fileTaskContext.getFileInfo();
 				taskContext.addTaskData("fileInfo",fileInfo);
 			}
 
@@ -280,7 +280,7 @@ public class Filelog2KafkaDemo {
 			public void afterCall(TaskContext taskContext) {
 				//文件采集完毕后执行，可以归档文件
 				FileTaskContext fileTaskContext = (FileTaskContext)taskContext;
-				FileReaderTask.FileInfo fileInfo = fileTaskContext.getFileInfo();
+				FileInfo fileInfo = fileTaskContext.getFileInfo();
 			}
 
 			@Override
@@ -303,7 +303,7 @@ public class Filelog2KafkaDemo {
 //					return;
 //				}
 //				System.out.println(data);
-				FileReaderTask.FileInfo fileInfo = (FileReaderTask.FileInfo) context.getTaskContext().getTaskData("fileInfo");
+				FileInfo fileInfo = (FileInfo) context.getTaskContext().getTaskData("fileInfo");
 
 //
 			}
