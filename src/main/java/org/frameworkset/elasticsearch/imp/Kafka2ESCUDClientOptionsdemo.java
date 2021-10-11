@@ -214,7 +214,7 @@ public class Kafka2ESCUDClientOptionsdemo {
 				long birthDay = context.getLongValue("birthDay");
 				context.addFieldValue("birthDay",new Date(birthDay));
 				// 获取原始的Kafka记录
-				KafkaMapRecord record = (KafkaMapRecord) context.getRecord();
+				KafkaMapRecord record = (KafkaMapRecord) context.getCurrentRecord();
 				if(record.getKey() == null)
 					System.out.println("key is null!");
 				int r = random.nextInt(3);

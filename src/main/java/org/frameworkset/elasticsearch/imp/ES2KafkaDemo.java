@@ -16,6 +16,7 @@ package org.frameworkset.elasticsearch.imp;
  */
 
 
+import com.frameworkset.util.SimpleStringUtil;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.frameworkset.elasticsearch.ElasticSearchHelper;
 import org.frameworkset.elasticsearch.client.ClientInterface;
@@ -35,13 +36,17 @@ import org.frameworkset.tran.schedule.ImportIncreamentConfig;
 import org.frameworkset.tran.schedule.TaskContext;
 import org.frameworkset.tran.task.TaskCommand;
 import org.frameworkset.tran.util.RecordGenerator;
+import org.frameworkset.tran.util.TranUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.io.Writer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>Description: 导出elasticsearch数据并发送kafka同步作业，如需调试同步功能，直接运行main方法</p>
@@ -157,13 +162,70 @@ public class ES2KafkaDemo {
 //指定文件中每条记录格式，不指定默认为json格式输出
 		kafkaOutputConfig.setRecordGenerator(new RecordGenerator() {
 			@Override
-			public void buildRecord(Context taskContext, CommonRecord record, Writer builder) {
+			public void buildRecord(Context taskContext, CommonRecord record, Writer builder) throws IOException {
 				//record.setRecordKey("xxxxxx"); //指定记录key
+
 				//直接将记录按照json格式输出到文本文件中
 				SerialUtil.normalObject2json(record.getDatas(),//获取记录中的字段数据并转换为json格式
 						builder);
 				String data = (String)taskContext.getTaskContext().getTaskData("data");//从任务上下文中获取本次任务执行前设置时间戳
+
 //          System.out.println(data);
+
+				/**
+				 * 自定义格式输出数据到消息builder中
+				 */
+				/**
+				Map<String,Object > datas = record.getDatas();
+				StringBuilder temp = new StringBuilder();
+				for(Map.Entry<String, Object> entry:datas.entrySet()){
+					if(temp.length() > 0)
+						temp.append(",").append(entry.getValue());
+					else
+						temp.append(entry.getValue());
+				}
+				builder.write(temp.toString());
+				*/
+				//更据字段拆分多条记录
+				Map<String,Object > datas = record.getDatas();
+				Object value = datas.get("content");
+				String value_ = String.valueOf(value);
+				if(value_.startsWith("[") && value_.endsWith("]")) {
+					List<Map> list = SimpleStringUtil.json2ListObject(value_, Map.class);
+
+					for(int i = 0; i < list.size(); i ++){
+						Map data_ = list.get(i);
+						StringBuilder temp = new StringBuilder();
+						Iterator<Map.Entry> iterator = data_.entrySet().iterator();
+						while(iterator.hasNext()){
+							Map.Entry entry = iterator.next();
+							if (temp.length() > 0)
+								temp.append(",").append(entry.getValue());
+							else
+								temp.append(entry.getValue());
+
+						}
+						if(i > 0)
+							builder.write(TranUtil.lineSeparator);
+						builder.write(temp.toString());
+
+					}
+
+				}
+				else {
+					StringBuilder temp = new StringBuilder();
+					for(Map.Entry<String, Object> entry:datas.entrySet()){
+
+							if (temp.length() > 0)
+								temp.append(",").append(entry.getValue());
+							else
+								temp.append(entry.getValue());
+
+					}
+
+					builder.write(temp.toString());
+				}
+
 
 			}
 		});
