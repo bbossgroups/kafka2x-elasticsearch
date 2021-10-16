@@ -35,7 +35,9 @@ import org.frameworkset.tran.task.TaskCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>Description: 采集日志文件数据并发送kafka作业，如需调试同步功能，直接运行main方法</p>
@@ -74,18 +76,30 @@ public class Filelog2KafkaSplitDemo {
 			 */
 			@Override
 			public List<KeyMap> splitField(TaskContext taskContext,//调度任务上下文
-														   Record record,//原始记录对象
-														   Object fieldValue) {//待切割的字段值
-//				Map<String,Object > data = (Map<String, Object>) record.getData();//获取原始记录中包含的数据对象
-				List<KeyMap> splitDatas = SimpleStringUtil.json2ListObject(String.valueOf(fieldValue),KeyMap.class);
-
+										   Record record,//原始记录对象
+										   Object fieldValue) {//待切割的字段值
+				//如果@message不是一个数组格式的json，那么就不要拆分原来的记录，直接返回null就可以了
+				String data =  String.valueOf(fieldValue);
+				if(!data.startsWith("["))
+					return null;
+				//把@message字段进行切割为一个List<Map>对象
+				List<Map> datas = SimpleStringUtil.json2ListObject(data, Map.class);
+				List<KeyMap> splitDatas =  new ArrayList<>(datas.size());
+				for(int i = 0; i < datas.size(); i ++){
+					Map map = datas.get(i);
+					KeyMap keyMap = new KeyMap();
+					keyMap.put("@message",map);//然后循环将map再放回新记录，作为新记录字段@message的值
+					splitDatas.add(keyMap);
+				}
 				return splitDatas;
 			}
 		});
-		importBuilder.addIgnoreFieldMapping("@message");
-		importBuilder.addIgnoreFieldMapping("@filemeta");
+		//将@message名称映射转换为message
+		importBuilder.addFieldMapping("@message","message");
 
-		importBuilder.addFieldMapping("@timestamp","timestamp");
+//		importBuilder.addIgnoreFieldMapping("@message");
+
+//		importBuilder.addFieldMapping("@timestamp","timestamp");
 
 		//kafka相关配置参数
 		/**
