@@ -220,8 +220,8 @@ public class Filelog2KafkaSplitDemo {
 		config.addConfig(new FileConfig()//指定多行记录的开头识别标记，正则表达式
 						.setSourcePath("D:\\workspace\\bbossesdemo\\kafka2x-elasticsearch\\data\\").setFileFilter(new FileFilter() {
 							@Override
-							public boolean accept(String dir, String name, FileConfig fileConfig) {
-								return name.endsWith(".json");
+							public boolean accept(FilterFileInfo filterFileInfo, FileConfig fileConfig) {
+								return filterFileInfo.getFileName().endsWith(".json");
 							}
 						})//指定文件过滤器.setCloseEOF(false)//已经结束的文件内容采集完毕后关闭文件对应的采集通道，后续不再监听对应文件的内容变化
 						.setCloseEOF(true)

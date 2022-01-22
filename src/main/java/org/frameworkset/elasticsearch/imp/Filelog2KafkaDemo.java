@@ -179,8 +179,8 @@ public class Filelog2KafkaDemo {
 		config.addConfig(new FileConfig()//指定多行记录的开头识别标记，正则表达式
 						.setSourcePath("D:\\logs\\sale_data").setFileFilter(new FileFilter() {
 							@Override
-							public boolean accept(String dir, String name, FileConfig fileConfig) {
-								return name.endsWith(".txt");
+							public boolean accept(FilterFileInfo filterFileInfo, FileConfig fileConfig) {
+								return filterFileInfo.getFileName().endsWith(".txt");
 							}
 						})//指定文件过滤器.setCloseEOF(false)//已经结束的文件内容采集完毕后关闭文件对应的采集通道，后续不再监听对应文件的内容变化
 						.setEnableInode(true).setCloseEOF(true)
