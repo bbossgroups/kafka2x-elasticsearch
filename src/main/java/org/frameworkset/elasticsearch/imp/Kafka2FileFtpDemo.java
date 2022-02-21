@@ -26,8 +26,9 @@ import org.frameworkset.tran.context.Context;
 import org.frameworkset.tran.kafka.KafkaImportConfig;
 import org.frameworkset.tran.kafka.input.fileftp.Kafka2FileFtpExportBuilder;
 import org.frameworkset.tran.metrics.TaskMetrics;
-import org.frameworkset.tran.output.fileftp.FileFtpOupputConfig;
+import org.frameworkset.tran.output.fileftp.FileOupputConfig;
 import org.frameworkset.tran.output.fileftp.FilenameGenerator;
+import org.frameworkset.tran.output.ftp.FtpOutConfig;
 import org.frameworkset.tran.schedule.TaskContext;
 import org.frameworkset.tran.task.TaskCommand;
 import org.frameworkset.tran.util.RecordGenerator;
@@ -66,18 +67,22 @@ public class Kafka2FileFtpDemo {
 
 
 		String ftpIp = CommonLauncher.getProperty("ftpIP","10.13.6.127");//同时指定了默认值
-		FileFtpOupputConfig fileFtpOupputConfig = new FileFtpOupputConfig();
-		fileFtpOupputConfig.setBackupSuccessFiles(true);
-		fileFtpOupputConfig.setTransferEmptyFiles(true);
-		fileFtpOupputConfig.setFtpIP(ftpIp);
+		FileOupputConfig fileFtpOupputConfig = new FileOupputConfig();
+		FtpOutConfig ftpOutConfig = new FtpOutConfig();
+		ftpOutConfig.setBackupSuccessFiles(true);
+		ftpOutConfig.setTransferEmptyFiles(true);
+		ftpOutConfig.setFtpIP(ftpIp);
+
+		ftpOutConfig.setFtpPort(5322);
+//		ftpOutConfig.addHostKeyVerifier("2a:da:5a:6a:cf:7d:65:e5:ac:ff:d3:73:7f:2c:55:c9");
+		ftpOutConfig.setFtpUser("ecs");
+		ftpOutConfig.setFtpPassword("ecs@123");
+		ftpOutConfig.setRemoteFileDir("/home/ecs/failLog");
+		ftpOutConfig.setKeepAliveTimeout(100000);
+		ftpOutConfig.setFailedFileResendInterval(100000);
+
+		fileFtpOupputConfig.setFtpOutConfig(ftpOutConfig);
 		fileFtpOupputConfig.setFileDir("D:\\workdir");
-		fileFtpOupputConfig.setFtpPort(5322);
-		fileFtpOupputConfig.addHostKeyVerifier("2a:da:5a:6a:cf:7d:65:e5:ac:ff:d3:73:7f:2c:55:c9");
-		fileFtpOupputConfig.setFtpUser("ecs");
-		fileFtpOupputConfig.setFtpPassword("ecs@123");
-		fileFtpOupputConfig.setRemoteFileDir("/home/ecs/failLog");
-		fileFtpOupputConfig.setKeepAliveTimeout(100000);
-		fileFtpOupputConfig.setFailedFileResendInterval(100000);
 		fileFtpOupputConfig.setMaxFileRecordSize(10);
 		fileFtpOupputConfig.setFilenameGenerator(new FilenameGenerator() {
 			@Override
@@ -94,7 +99,7 @@ public class Kafka2FileFtpDemo {
 
 			}
 		});
-		importBuilder.setFileFtpOupputConfig(fileFtpOupputConfig);
+		importBuilder.setFileOupputConfig(fileFtpOupputConfig);
 		//kafka相关配置参数
 		/**
 		 *
