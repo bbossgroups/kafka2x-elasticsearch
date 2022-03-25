@@ -80,6 +80,7 @@ public class ES2KafkaDemo {
 	public void scheduleTimestampImportData(){
 		ES2KafkaExportBuilder importBuilder = new ES2KafkaExportBuilder();
 		importBuilder.setFetchSize(300);
+		importBuilder.setLogsendTaskMetric(10l);
 		//kafka相关配置参数
 		/**
 		 *
@@ -153,7 +154,7 @@ public class ES2KafkaDemo {
 		kafkaOutputConfig.addKafkaProperty("key.serializer","org.apache.kafka.common.serialization.LongSerializer");
 		kafkaOutputConfig.addKafkaProperty("compression.type","gzip");
 //		kafkaOutputConfig.addKafkaProperty("bootstrap.servers","192.168.137.133:9092");
-		kafkaOutputConfig.addKafkaProperty("bootstrap.servers","10.13.11.12:9092");
+		kafkaOutputConfig.addKafkaProperty("bootstrap.servers","10.13.6.12:9092");
 
 		kafkaOutputConfig.addKafkaProperty("batch.size","10");
 //		kafkaOutputConfig.addKafkaProperty("linger.ms","10000");
@@ -238,7 +239,7 @@ public class ES2KafkaDemo {
 				.setScrollLiveTime("10m")
 //				.setSliceQuery(true)
 //				.setSliceSize(5)
-				.setQueryUrl("dbdemo/_search")
+				.setQueryUrl("newdbdemo/_search")
 				//通过简单的示例，演示根据实间范围计算queryUrl,以当前时间为截止时间，后续版本6.2.8将增加lastEndtime参数作为截止时间（在设置了IncreamentEndOffset情况下有值）
 //				.setQueryUrlFunction((TaskContext taskContext, Date lastStartTime, Date lastEndTime)->{
 //					String formate = "yyyy.MM.dd";
@@ -279,12 +280,14 @@ public class ES2KafkaDemo {
 
 			@Override
 			public void afterCall(TaskContext taskContext) {
-				System.out.println("afterCall 1");
+				taskContext.await();
+				//taskContext.await(100000l); //指定一个最长等待时间
+				logger.info("afterCall ----------"+taskContext.getJobTaskMetrics().toString());
 			}
 
 			@Override
 			public void throwException(TaskContext taskContext, Exception e) {
-				System.out.println("throwException 1");
+				logger.info(taskContext.getJobTaskMetrics().toString(),e);
 			}
 		});
 //		//设置任务执行拦截器结束，可以添加多个
@@ -404,7 +407,7 @@ public class ES2KafkaDemo {
 
 			@Override
 			public void exception(TaskCommand<Object,RecordMetadata> taskCommand, Exception exception) {
-				System.out.println(taskCommand.getTaskMetrics());
+				logger.error(taskCommand.getTaskMetrics().toString(),exception);
 			}
 
 			@Override
