@@ -22,10 +22,10 @@ import org.frameworkset.tran.CommonRecord;
 import org.frameworkset.tran.DataRefactor;
 import org.frameworkset.tran.DataStream;
 import org.frameworkset.tran.ExportResultHandler;
+import org.frameworkset.tran.config.ImportBuilder;
 import org.frameworkset.tran.context.Context;
-import org.frameworkset.tran.kafka.KafkaImportConfig;
-import org.frameworkset.tran.kafka.output.KafkaOutputConfig;
-import org.frameworkset.tran.kafka.output.kafka.Kafka2KafkaExportBuilder;
+import org.frameworkset.tran.plugin.kafka.input.Kafka2InputConfig;
+import org.frameworkset.tran.plugin.kafka.output.Kafka2OutputConfig;
 import org.frameworkset.tran.task.TaskCommand;
 import org.frameworkset.tran.util.RecordGenerator;
 import org.slf4j.Logger;
@@ -34,6 +34,9 @@ import org.slf4j.LoggerFactory;
 import java.io.Writer;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.frameworkset.tran.plugin.kafka.input.KafkaInputConfig.CODEC_JSON;
+import static org.frameworkset.tran.plugin.kafka.input.KafkaInputConfig.CODEC_LONG;
 
 /**
  * <p>Description: 同步处理程序，如需调试同步功能，直接运行main方法</p>
@@ -58,7 +61,7 @@ public class Kafka2Kafkademo {
 	 * elasticsearch地址和数据库地址都从外部配置文件application.properties中获取，加载数据源配置和es配置
 	 */
 	public void scheduleTimestampImportData(boolean dropIndice){
-		Kafka2KafkaExportBuilder importBuilder = new Kafka2KafkaExportBuilder();
+		ImportBuilder importBuilder = new ImportBuilder();
 
 
 		importBuilder.setPrintTaskLog(true); //可选项，true 打印任务执行日志（耗时，处理记录数） false 不打印，默认值false
@@ -121,7 +124,9 @@ public class Kafka2Kafkademo {
 		 */
 		// kafka输入服务器参数配置
 		// kafka 2x 客户端参数项及说明类：org.apache.kafka.clients.consumer.ConsumerConfig
-		importBuilder//.addKafkaConfig("value.deserializer","org.apache.kafka.common.serialization.StringDeserializer")
+		Kafka2InputConfig kafka2InputConfig = new Kafka2InputConfig();
+
+		kafka2InputConfig//.addKafkaConfig("value.deserializer","org.apache.kafka.common.serialization.StringDeserializer")
 				//.addKafkaConfig("key.deserializer","org.apache.kafka.common.serialization.LongDeserializer")
 				.addKafkaConfig("group.id","trandbtest") // 消费组ID
 				.addKafkaConfig("session.timeout.ms","30000")
@@ -138,13 +143,13 @@ public class Kafka2Kafkademo {
 				.setCheckinterval(2000)   // 批量从kafka拉取数据，闲置时间间隔，如果在指定的时间间隔内，没有数据到达并且数据拉取队列中有数据，则强制将队列中的数据交给同步作业程序进行同步处理
 
 				.setPollTimeOut(1000) // 从kafka consumer poll(timeout)参数
-				.setValueCodec(KafkaImportConfig.CODEC_JSON)
-				.setKeyCodec(KafkaImportConfig.CODEC_LONG);
+				.setValueCodec(CODEC_JSON)
+				.setKeyCodec(CODEC_LONG);
 
 
 		// kafka输出服务器参数配置
 		// kafka 2x 客户端参数项及说明类：org.apache.kafka.clients.consumer.ConsumerConfig
-		KafkaOutputConfig kafkaOutputConfig = new KafkaOutputConfig();
+		Kafka2OutputConfig kafkaOutputConfig = new Kafka2OutputConfig();
 		kafkaOutputConfig.setTopic("kafka2kafka");//设置kafka主题名称
 		kafkaOutputConfig.addKafkaProperty("value.serializer","org.apache.kafka.common.serialization.StringSerializer");
 		kafkaOutputConfig.addKafkaProperty("key.serializer","org.apache.kafka.common.serialization.LongSerializer");
@@ -166,7 +171,7 @@ public class Kafka2Kafkademo {
 
 			}
 		});
-		importBuilder.setKafkaOutputConfig(kafkaOutputConfig);
+		importBuilder.setOutputConfig(kafkaOutputConfig);
 		importBuilder.setExportResultHandler(new ExportResultHandler<Object, RecordMetadata>() {
 			@Override
 			public void success(TaskCommand<Object, RecordMetadata> taskCommand, RecordMetadata result) {
@@ -338,23 +343,6 @@ public class Kafka2Kafkademo {
 		importBuilder.setThreadCount(50);//设置批量导入线程池工作线程数量
 		importBuilder.setContinueOnError(true);//任务出现异常，是否继续执行作业：true（默认值）继续执行 false 中断作业执行
 		importBuilder.setAsyn(false);//true 异步方式执行，不等待所有导入作业任务结束，方法快速返回；false（默认值） 同步方式执行，等待所有导入作业任务结束，所有作业结束后方法才返回
-		importBuilder.setEsIdField("_id");//设置文档主键，不设置，则自动产生文档id
-//		importBuilder.setDebugResponse(false);//设置是否将每次处理的reponse打印到日志文件中，默认false，不打印响应报文将大大提升性能，只有在调试需要的时候才打开，log日志级别同时要设置为INFO
-//		importBuilder.setDiscardBulkResponse(true);//设置是否需要批量处理的响应报文，不需要设置为false，true为需要，默认true，如果不需要响应报文将大大提升处理速度
-
-
-		/**
-		 importBuilder.setEsIdGenerator(new EsIdGenerator() {
-		 //如果指定EsIdGenerator，则根据下面的方法生成文档id，
-		 // 否则根据setEsIdField方法设置的字段值作为文档id，
-		 // 如果默认没有配置EsIdField和如果指定EsIdGenerator，则由es自动生成文档id
-
-		 @Override
-		 public Object genId(Context context) throws Exception {
-		 return SimpleStringUtil.getUUID();//返回null，则由es自动生成文档id
-		 }
-		 });
-		 */
 		/**
 		 * 构建DataStream，执行mongodb数据到es的同步操作
 		 */

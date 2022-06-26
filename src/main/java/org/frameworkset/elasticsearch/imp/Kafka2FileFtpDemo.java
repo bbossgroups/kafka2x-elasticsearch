@@ -22,13 +22,13 @@ import org.frameworkset.tran.CommonRecord;
 import org.frameworkset.tran.DataRefactor;
 import org.frameworkset.tran.DataStream;
 import org.frameworkset.tran.ExportResultHandler;
+import org.frameworkset.tran.config.ImportBuilder;
 import org.frameworkset.tran.context.Context;
-import org.frameworkset.tran.kafka.KafkaImportConfig;
-import org.frameworkset.tran.kafka.input.fileftp.Kafka2FileFtpExportBuilder;
 import org.frameworkset.tran.metrics.TaskMetrics;
-import org.frameworkset.tran.output.fileftp.FileOupputConfig;
 import org.frameworkset.tran.output.fileftp.FilenameGenerator;
 import org.frameworkset.tran.output.ftp.FtpOutConfig;
+import org.frameworkset.tran.plugin.file.output.FileOutputConfig;
+import org.frameworkset.tran.plugin.kafka.input.Kafka2InputConfig;
 import org.frameworkset.tran.schedule.TaskContext;
 import org.frameworkset.tran.task.TaskCommand;
 import org.frameworkset.tran.util.RecordGenerator;
@@ -38,6 +38,9 @@ import org.slf4j.LoggerFactory;
 import java.io.Writer;
 import java.text.DateFormat;
 import java.util.Date;
+
+import static org.frameworkset.tran.plugin.kafka.input.KafkaInputConfig.CODEC_JSON;
+import static org.frameworkset.tran.plugin.kafka.input.KafkaInputConfig.CODEC_LONG;
 
 /**
  * <p>Description: 采集日志文件数据并发送kafka作业，如需调试同步功能，直接运行main方法</p>
@@ -62,12 +65,12 @@ public class Kafka2FileFtpDemo {
 	 * elasticsearch地址和数据库地址都从外部配置文件application.properties中获取，加载数据源配置和es配置
 	 */
 	public void scheduleTimestampImportData(){
-		Kafka2FileFtpExportBuilder importBuilder = new Kafka2FileFtpExportBuilder();
+		ImportBuilder importBuilder = new ImportBuilder();
 		importBuilder.setBatchSize(500).setFetchSize(1000);
 
 
 		String ftpIp = CommonLauncher.getProperty("ftpIP","10.13.6.127");//同时指定了默认值
-		FileOupputConfig fileFtpOupputConfig = new FileOupputConfig();
+		FileOutputConfig fileFtpOupputConfig = new FileOutputConfig();
 		FtpOutConfig ftpOutConfig = new FtpOutConfig();
 		ftpOutConfig.setBackupSuccessFiles(true);
 		ftpOutConfig.setTransferEmptyFiles(true);
@@ -99,7 +102,7 @@ public class Kafka2FileFtpDemo {
 
 			}
 		});
-		importBuilder.setFileOupputConfig(fileFtpOupputConfig);
+		importBuilder.setOutputConfig(fileFtpOupputConfig);
 		//kafka相关配置参数
 		/**
 		 *
@@ -156,7 +159,9 @@ public class Kafka2FileFtpDemo {
 		 */
 		// kafka服务器参数配置
 		// kafka 2x 客户端参数项及说明类：org.apache.kafka.clients.consumer.ConsumerConfig
-		importBuilder//.addKafkaConfig("value.deserializer","org.apache.kafka.common.serialization.StringDeserializer")
+		Kafka2InputConfig kafka2InputConfig = new Kafka2InputConfig();
+
+		kafka2InputConfig//.addKafkaConfig("value.deserializer","org.apache.kafka.common.serialization.StringDeserializer")
 				//.addKafkaConfig("key.deserializer","org.apache.kafka.common.serialization.LongDeserializer")
 				.addKafkaConfig("group.id","trandbtest") // 消费组ID
 				.addKafkaConfig("session.timeout.ms","30000")
@@ -173,8 +178,9 @@ public class Kafka2FileFtpDemo {
 				.setCheckinterval(2000)   // 批量从kafka拉取数据，闲置时间间隔，如果在指定的时间间隔内，没有数据到达并且数据拉取队列中有数据，则强制将队列中的数据交给同步作业程序进行同步处理
 
 				.setPollTimeOut(1000) // 从kafka consumer poll(timeout)参数
-				.setValueCodec(KafkaImportConfig.CODEC_JSON)
-				.setKeyCodec(KafkaImportConfig.CODEC_LONG);
+				.setValueCodec(CODEC_JSON)
+				.setKeyCodec(CODEC_LONG);
+		importBuilder.setInputConfig(kafka2InputConfig);
 		importBuilder.setFlushInterval(10000l);
 		importBuilder.setFromFirst(true);//setFromfirst(false)，如果作业停了，作业重启后从上次截止位置开始采集数据，
 		//setFromfirst(true) 如果作业停了，作业重启后，重新开始采集数据

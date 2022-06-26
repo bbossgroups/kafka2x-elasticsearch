@@ -23,10 +23,11 @@ import org.frameworkset.tran.CommonRecord;
 import org.frameworkset.tran.DataRefactor;
 import org.frameworkset.tran.DataStream;
 import org.frameworkset.tran.ExportResultHandler;
+import org.frameworkset.tran.config.ImportBuilder;
 import org.frameworkset.tran.context.Context;
-import org.frameworkset.tran.kafka.output.KafkaOutputConfig;
-import org.frameworkset.tran.kafka.output.db.DB2KafkaExportBuilder;
 import org.frameworkset.tran.metrics.TaskMetrics;
+import org.frameworkset.tran.plugin.db.input.DBInputConfig;
+import org.frameworkset.tran.plugin.kafka.output.Kafka2OutputConfig;
 import org.frameworkset.tran.schedule.CallInterceptor;
 import org.frameworkset.tran.schedule.ImportIncreamentConfig;
 import org.frameworkset.tran.schedule.TaskContext;
@@ -61,7 +62,7 @@ public class DB2KafkaDemo {
 	 * elasticsearch地址和数据库地址都从外部配置文件application.properties中获取，加载数据源配置和es配置
 	 */
 	public void scheduleTimestampImportData(){
-		DB2KafkaExportBuilder importBuilder = new DB2KafkaExportBuilder();
+		ImportBuilder importBuilder = new ImportBuilder();
 //		importBuilder.setFetchSize(300);
 		//kafka相关配置参数
 		/**
@@ -130,7 +131,7 @@ public class DB2KafkaDemo {
 
 		// kafka服务器参数配置
 		// kafka 2x 客户端参数项及说明类：org.apache.kafka.clients.consumer.ConsumerConfig
-		KafkaOutputConfig kafkaOutputConfig = new KafkaOutputConfig();
+		Kafka2OutputConfig kafkaOutputConfig = new Kafka2OutputConfig();
 		kafkaOutputConfig.setTopic("db2kafka");
 		kafkaOutputConfig.addKafkaProperty("value.serializer","org.apache.kafka.common.serialization.StringSerializer");
 		kafkaOutputConfig.addKafkaProperty("key.serializer","org.apache.kafka.common.serialization.LongSerializer");
@@ -152,10 +153,10 @@ public class DB2KafkaDemo {
 
 			}
 		});
-		importBuilder.setKafkaOutputConfig(kafkaOutputConfig);
+		importBuilder.setOutputConfig(kafkaOutputConfig);
 //		importBuilder.setIncreamentEndOffset(300);//单位秒，同步从上次同步截止时间当前时间前5分钟的数据，下次继续从上次截止时间开始同步数据,对增量时间戳数据同步起作用
-		importBuilder
-				.setSqlFilepath("sqlFile.xml")
+		DBInputConfig dbInputConfig = new DBInputConfig();
+		dbInputConfig.setSqlFilepath("sqlFile.xml")
 				.setSqlName("demoexport");
 
 		//定时任务配置，

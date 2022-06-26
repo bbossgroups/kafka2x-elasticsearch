@@ -27,10 +27,11 @@ import org.frameworkset.tran.CommonRecord;
 import org.frameworkset.tran.DataRefactor;
 import org.frameworkset.tran.DataStream;
 import org.frameworkset.tran.ExportResultHandler;
+import org.frameworkset.tran.config.ImportBuilder;
 import org.frameworkset.tran.context.Context;
-import org.frameworkset.tran.kafka.output.KafkaOutputConfig;
-import org.frameworkset.tran.kafka.output.es.ES2KafkaExportBuilder;
 import org.frameworkset.tran.metrics.TaskMetrics;
+import org.frameworkset.tran.plugin.es.input.ElasticsearchInputConfig;
+import org.frameworkset.tran.plugin.kafka.output.Kafka2OutputConfig;
 import org.frameworkset.tran.schedule.CallInterceptor;
 import org.frameworkset.tran.schedule.ImportIncreamentConfig;
 import org.frameworkset.tran.schedule.TaskContext;
@@ -78,7 +79,7 @@ public class ES2KafkaDemo {
 	 * elasticsearch地址和数据库地址都从外部配置文件application.properties中获取，加载数据源配置和es配置
 	 */
 	public void scheduleTimestampImportData(){
-		ES2KafkaExportBuilder importBuilder = new ES2KafkaExportBuilder();
+		ImportBuilder importBuilder = new ImportBuilder();
 		importBuilder.setFetchSize(300);
 		importBuilder.setLogsendTaskMetric(10l);
 		//kafka相关配置参数
@@ -148,13 +149,13 @@ public class ES2KafkaDemo {
 
 		// kafka服务器参数配置
 		// kafka 2x 客户端参数项及说明类：org.apache.kafka.clients.consumer.ConsumerConfig
-		KafkaOutputConfig kafkaOutputConfig = new KafkaOutputConfig();
+		Kafka2OutputConfig kafkaOutputConfig = new Kafka2OutputConfig();
 		kafkaOutputConfig.setTopic("es2kafka");//设置kafka主题名称
 		kafkaOutputConfig.addKafkaProperty("value.serializer","org.apache.kafka.common.serialization.StringSerializer");
 		kafkaOutputConfig.addKafkaProperty("key.serializer","org.apache.kafka.common.serialization.LongSerializer");
 		kafkaOutputConfig.addKafkaProperty("compression.type","gzip");
-//		kafkaOutputConfig.addKafkaProperty("bootstrap.servers","192.168.137.133:9092");
-		kafkaOutputConfig.addKafkaProperty("bootstrap.servers","10.13.6.12:9092");
+		kafkaOutputConfig.addKafkaProperty("bootstrap.servers","192.168.137.133:9092");
+//		kafkaOutputConfig.addKafkaProperty("bootstrap.servers","10.13.6.12:9092");
 
 		kafkaOutputConfig.addKafkaProperty("batch.size","10");
 //		kafkaOutputConfig.addKafkaProperty("linger.ms","10000");
@@ -230,16 +231,17 @@ public class ES2KafkaDemo {
 
 			}
 		});
-		importBuilder.setKafkaOutputConfig(kafkaOutputConfig);
+		importBuilder.setOutputConfig(kafkaOutputConfig);
 		importBuilder.setIncreamentEndOffset(300);//单位秒，同步从上次同步截止时间当前时间前5分钟的数据，下次继续从上次截止时间开始同步数据
 		//vops-chbizcollect-2020.11.26,vops-chbizcollect-2020.11.27
-		importBuilder
-				.setDsl2ndSqlFile("dsl2ndSqlFile.xml")
+		ElasticsearchInputConfig elasticsearchInputConfig = new ElasticsearchInputConfig();
+		elasticsearchInputConfig
+				.setDslFile("dsl2ndSqlFile.xml")
 				.setDslName("scrollQuery")
-				.setScrollLiveTime("10m")
+				.setScrollLiveTime("10m").setSourceElasticsearch("default")
 //				.setSliceQuery(true)
 //				.setSliceSize(5)
-				.setQueryUrl("newdbdemo/_search")
+				.setQueryUrl("dbdemo/_search");
 				//通过简单的示例，演示根据实间范围计算queryUrl,以当前时间为截止时间，后续版本6.2.8将增加lastEndtime参数作为截止时间（在设置了IncreamentEndOffset情况下有值）
 //				.setQueryUrlFunction((TaskContext taskContext, Date lastStartTime, Date lastEndTime)->{
 //					String formate = "yyyy.MM.dd";
@@ -250,12 +252,11 @@ public class ES2KafkaDemo {
 //					return "dbdemo-"+startTime+ ",dbdemo-"+endTimeStr+"/_search";
 ////					return "vops-chbizcollect-2020.11.26,vops-chbizcollect-2020.11.27/_search";
 //				})
-
+		importBuilder.setInputConfig(elasticsearchInputConfig)
 //				//添加dsl中需要用到的参数及参数值
 				.addParam("var1","v1")
 				.addParam("var2","v2")
 				.addParam("var3","v3");
-		importBuilder.setSourceElasticsearch("default");
 
 		//定时任务配置，
 		importBuilder.setFixedRate(false)//参考jdk timer task文档对fixedRate的说明
@@ -293,7 +294,7 @@ public class ES2KafkaDemo {
 //		//设置任务执行拦截器结束，可以添加多个
 		//增量配置开始
 		importBuilder.setLastValueColumn("collecttime");//手动指定日期增量查询字段变量名称
-		importBuilder.setFromFirst(true);//setFromfirst(false)，如果作业停了，作业重启后从上次截止位置开始采集数据，
+		importBuilder.setFromFirst(false);//setFromfirst(false)，如果作业停了，作业重启后从上次截止位置开始采集数据，
 		//setFromfirst(true) 如果作业停了，作业重启后，重新开始采集数据
 		importBuilder.setLastValueStorePath("es2kafka");//记录上次采集的增量字段值的文件路径，作为下次增量（或者重启后）采集数据的起点，不同的任务这个路径要不一样
 //		importBuilder.setLastValueStoreTableName("logs");//记录上次采集的增量字段值的表，可以不指定，采用默认表名increament_tab
