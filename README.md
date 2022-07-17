@@ -25,8 +25,8 @@ Spring boot： 1.x,2.x,+
 ```xml
 <dependency>
   <groupId>com.bbossgroups.plugins</groupId>
-  <artifactId>bboss-elasticsearch-rest-kafka2x</artifactId>
-  <version>6.6.0</version>
+  <artifactId>bboss-datatran-kafka2x</artifactId>
+  <version>6.7.0</version>
   <scope>compile</scope>
 </dependency>
 ```
