@@ -180,7 +180,7 @@ public class Filelog2KafkaSplitDemo {
 //		kafkaOutputConfig.addKafkaProperty("buffer.memory","268435456");
 		kafkaOutputConfig.addKafkaProperty("max.block.ms","600000");
 		kafkaOutputConfig.setKafkaAsynSend(true);
-		kafkaOutputConfig.setLogsendTaskMetric(1000l);//设置发送多少条消息后打印发送统计信息
+		importBuilder.setLogsendTaskMetric(1000l);//设置发送多少条消息后打印发送统计信息
 
 //		./kafka-console-consumer.sh --bootstrap-server 10.13.6.12:9092 --topic filelog2kafka --from-beginning
 //指定文件中每条记录格式，不指定默认为json格式输出
