@@ -157,8 +157,8 @@ public class DB2KafkaDemo {
 //		importBuilder.setIncreamentEndOffset(300);//单位秒，同步从上次同步截止时间当前时间前5分钟的数据，下次继续从上次截止时间开始同步数据,对增量时间戳数据同步起作用
 		DBInputConfig dbInputConfig = new DBInputConfig();
 		dbInputConfig.setSqlFilepath("sqlFile.xml")
-				.setSqlName("demoexport");
-
+				.setSqlName("demoexport").setDbName("test");
+		importBuilder.setInputConfig(dbInputConfig);
 		//定时任务配置，
 		importBuilder.setFixedRate(false)//参考jdk timer task文档对fixedRate的说明
 //					 .setScheduleDate(date) //指定任务开始执行时间：日期
