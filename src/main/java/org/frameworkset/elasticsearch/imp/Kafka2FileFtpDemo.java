@@ -175,7 +175,7 @@ public class Kafka2FileFtpDemo {
 		// kafka服务器参数配置
 		// kafka 2x 客户端参数项及说明类：org.apache.kafka.clients.consumer.ConsumerConfig
 		Kafka2InputConfig kafka2InputConfig = new Kafka2InputConfig();
-		kafka2InputConfig.setMetricsInterval(30 * 1000L);
+		kafka2InputConfig.setMetricsInterval(30 * 1000L);//30秒做一次任务拦截调用，
 		kafka2InputConfig//.addKafkaConfig("value.deserializer","org.apache.kafka.common.serialization.StringDeserializer")
 				//.addKafkaConfig("key.deserializer","org.apache.kafka.common.serialization.LongDeserializer")
 				.addKafkaConfig("group.id","trandbtest") // 消费组ID
