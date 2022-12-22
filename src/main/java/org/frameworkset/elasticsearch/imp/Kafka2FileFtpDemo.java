@@ -29,18 +29,21 @@ import org.frameworkset.tran.output.fileftp.FilenameGenerator;
 import org.frameworkset.tran.output.ftp.FtpOutConfig;
 import org.frameworkset.tran.plugin.file.output.FileOutputConfig;
 import org.frameworkset.tran.plugin.kafka.input.Kafka2InputConfig;
+import org.frameworkset.tran.schedule.CallInterceptor;
 import org.frameworkset.tran.schedule.TaskContext;
 import org.frameworkset.tran.task.TaskCommand;
 import org.frameworkset.tran.util.RecordGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.io.Writer;
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.Map;
 
-import static org.frameworkset.tran.plugin.kafka.input.KafkaInputConfig.CODEC_JSON;
 import static org.frameworkset.tran.plugin.kafka.input.KafkaInputConfig.CODEC_LONG;
+import static org.frameworkset.tran.plugin.kafka.input.KafkaInputConfig.CODEC_TEXT;
 
 /**
  * <p>Description: 采集日志文件数据并发送kafka作业，如需调试同步功能，直接运行main方法</p>
@@ -85,7 +88,8 @@ public class Kafka2FileFtpDemo {
 		ftpOutConfig.setFailedFileResendInterval(100000);
 
 		fileFtpOupputConfig.setFtpOutConfig(ftpOutConfig);
-		fileFtpOupputConfig.setFileDir("D:\\workdir");
+		fileFtpOupputConfig.setDisableftp(true);
+		fileFtpOupputConfig.setFileDir("D:\\workdir\\kafka2file");
 		fileFtpOupputConfig.setMaxFileRecordSize(10);
 		fileFtpOupputConfig.setFilenameGenerator(new FilenameGenerator() {
 			@Override
@@ -98,7 +102,18 @@ public class Kafka2FileFtpDemo {
 		fileFtpOupputConfig.setRecordGenerator(new RecordGenerator() {
 			@Override
 			public void buildRecord(Context taskContext, CommonRecord record, Writer builder) {
-				SerialUtil.normalObject2json(record.getDatas(),builder);
+				Map datas = record.getDatas();
+				datas.forEach((key,value)->{
+					try {
+						builder.write(String.valueOf(key));
+						builder.write("=");
+						builder.write(String.valueOf(value));
+						builder.write(",");
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				});
+//				SerialUtil.normalObject2json(record.getDatas(),builder);
 
 			}
 		});
@@ -160,7 +175,7 @@ public class Kafka2FileFtpDemo {
 		// kafka服务器参数配置
 		// kafka 2x 客户端参数项及说明类：org.apache.kafka.clients.consumer.ConsumerConfig
 		Kafka2InputConfig kafka2InputConfig = new Kafka2InputConfig();
-
+		kafka2InputConfig.setMetricsInterval(30 * 1000L);
 		kafka2InputConfig//.addKafkaConfig("value.deserializer","org.apache.kafka.common.serialization.StringDeserializer")
 				//.addKafkaConfig("key.deserializer","org.apache.kafka.common.serialization.LongDeserializer")
 				.addKafkaConfig("group.id","trandbtest") // 消费组ID
@@ -168,7 +183,7 @@ public class Kafka2FileFtpDemo {
 				.addKafkaConfig("auto.commit.interval.ms","5000")
 				.addKafkaConfig("auto.offset.reset","latest")
 //				.addKafkaConfig("bootstrap.servers","192.168.137.133:9093")
-				.addKafkaConfig("bootstrap.servers","10.13.11.12:9092")
+				.addKafkaConfig("bootstrap.servers","10.13.6.12:9092")
 				.addKafkaConfig("enable.auto.commit","true")
 				.addKafkaConfig("max.poll.records","500") // The maximum number of records returned in a single call to poll().
 				.setKafkaTopic("es2kafka") // kafka topic
@@ -178,7 +193,7 @@ public class Kafka2FileFtpDemo {
 				.setCheckinterval(2000)   // 批量从kafka拉取数据，闲置时间间隔，如果在指定的时间间隔内，没有数据到达并且数据拉取队列中有数据，则强制将队列中的数据交给同步作业程序进行同步处理
 
 				.setPollTimeOut(1000) // 从kafka consumer poll(timeout)参数
-				.setValueCodec(CODEC_JSON)
+				.setValueCodec(CODEC_TEXT)
 				.setKeyCodec(CODEC_LONG);
 		importBuilder.setInputConfig(kafka2InputConfig);
 		importBuilder.setFlushInterval(10000l);
@@ -222,7 +237,22 @@ public class Kafka2FileFtpDemo {
 		importBuilder.setGeoipDatabase("E:/workspace/hnai/terminal/geolite2/GeoLite2-City.mmdb");
 		importBuilder.setGeoipAsnDatabase("E:/workspace/hnai/terminal/geolite2/GeoLite2-ASN.mmdb");
 		importBuilder.setGeoip2regionDatabase("E:/workspace/hnai/terminal/geolite2/ip2region.db");
+		importBuilder.addCallInterceptor(new CallInterceptor() {
+			@Override
+			public void preCall(TaskContext taskContext) {
+				logger.info("preCall(TaskContext taskContext) ");
+			}
 
+			@Override
+			public void afterCall(TaskContext taskContext) {
+				logger.info("afterCall(TaskContext taskContext) ");
+			}
+
+			@Override
+			public void throwException(TaskContext taskContext, Throwable e) {
+				logger.info("throwException(TaskContext taskContext, Throwable e)",e);
+			}
+		});
 		/**
 		 * 重新设置es数据结构
 		 */
@@ -293,7 +323,7 @@ public class Kafka2FileFtpDemo {
 			}
 
 			@Override
-			public void exception(TaskCommand<String,String> taskCommand, Exception exception) {
+			public void exception(TaskCommand<String,String> taskCommand, Throwable exception) {
 				logger.warn(taskCommand.getTaskMetrics().toString(),exception);
 			}
 

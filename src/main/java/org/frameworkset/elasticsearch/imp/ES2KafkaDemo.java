@@ -16,7 +16,6 @@ package org.frameworkset.elasticsearch.imp;
  */
 
 
-import com.frameworkset.util.SimpleStringUtil;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.frameworkset.elasticsearch.ElasticSearchHelper;
 import org.frameworkset.elasticsearch.client.ClientInterface;
@@ -37,7 +36,6 @@ import org.frameworkset.tran.schedule.ImportIncreamentConfig;
 import org.frameworkset.tran.schedule.TaskContext;
 import org.frameworkset.tran.task.TaskCommand;
 import org.frameworkset.tran.util.RecordGenerator;
-import org.frameworkset.tran.util.TranUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,9 +43,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 /**
  * <p>Description: 导出elasticsearch数据并发送kafka同步作业，如需调试同步功能，直接运行main方法</p>
@@ -154,13 +150,15 @@ public class ES2KafkaDemo {
 		kafkaOutputConfig.addKafkaProperty("value.serializer","org.apache.kafka.common.serialization.StringSerializer");
 		kafkaOutputConfig.addKafkaProperty("key.serializer","org.apache.kafka.common.serialization.LongSerializer");
 		kafkaOutputConfig.addKafkaProperty("compression.type","gzip");
-		kafkaOutputConfig.addKafkaProperty("bootstrap.servers","192.168.137.133:9092");
+		kafkaOutputConfig.addKafkaProperty("bootstrap.servers","10.13.6.12:9092");
 //		kafkaOutputConfig.addKafkaProperty("bootstrap.servers","10.13.6.12:9092");
 
 		kafkaOutputConfig.addKafkaProperty("batch.size","10");
 //		kafkaOutputConfig.addKafkaProperty("linger.ms","10000");
 //		kafkaOutputConfig.addKafkaProperty("buffer.memory","10000");
 		kafkaOutputConfig.setKafkaAsynSend(true);
+		kafkaOutputConfig.setEnableMetricsAgg(true);
+		kafkaOutputConfig.setMetricsAggWindow(60);
 //指定文件中每条记录格式，不指定默认为json格式输出
 		kafkaOutputConfig.setRecordGenerator(new RecordGenerator() {
 			@Override
@@ -170,63 +168,63 @@ public class ES2KafkaDemo {
 				//直接将记录按照json格式输出到文本文件中
 				SerialUtil.normalObject2json(record.getDatas(),//获取记录中的字段数据并转换为json格式
 						builder);
-				String data = (String)taskContext.getTaskContext().getTaskData("data");//从任务上下文中获取本次任务执行前设置时间戳
-
-//          System.out.println(data);
-
-				/**
-				 * 自定义格式输出数据到消息builder中
-				 */
-				/**
-				Map<String,Object > datas = record.getDatas();
-				StringBuilder temp = new StringBuilder();
-				for(Map.Entry<String, Object> entry:datas.entrySet()){
-					if(temp.length() > 0)
-						temp.append(",").append(entry.getValue());
-					else
-						temp.append(entry.getValue());
-				}
-				builder.write(temp.toString());
-				*/
-				//更据字段拆分多条记录
-				Map<String,Object > datas = record.getDatas();
-				Object value = datas.get("content");
-				String value_ = String.valueOf(value);
-				if(value_.startsWith("[") && value_.endsWith("]")) {
-					List<Map> list = SimpleStringUtil.json2ListObject(value_, Map.class);
-
-					for(int i = 0; i < list.size(); i ++){
-						Map data_ = list.get(i);
-						StringBuilder temp = new StringBuilder();
-						Iterator<Map.Entry> iterator = data_.entrySet().iterator();
-						while(iterator.hasNext()){
-							Map.Entry entry = iterator.next();
-							if (temp.length() > 0)
-								temp.append(",").append(entry.getValue());
-							else
-								temp.append(entry.getValue());
-
-						}
-						if(i > 0)
-							builder.write(TranUtil.lineSeparator);
-						builder.write(temp.toString());
-
-					}
-
-				}
-				else {
-					StringBuilder temp = new StringBuilder();
-					for(Map.Entry<String, Object> entry:datas.entrySet()){
-
-							if (temp.length() > 0)
-								temp.append(",").append(entry.getValue());
-							else
-								temp.append(entry.getValue());
-
-					}
-
-					builder.write(temp.toString());
-				}
+//				String data = (String)taskContext.getTaskContext().getTaskData("data");//从任务上下文中获取本次任务执行前设置时间戳
+//
+////          System.out.println(data);
+//
+//				/**
+//				 * 自定义格式输出数据到消息builder中
+//				 */
+//				/**
+//				Map<String,Object > datas = record.getDatas();
+//				StringBuilder temp = new StringBuilder();
+//				for(Map.Entry<String, Object> entry:datas.entrySet()){
+//					if(temp.length() > 0)
+//						temp.append(",").append(entry.getValue());
+//					else
+//						temp.append(entry.getValue());
+//				}
+//				builder.write(temp.toString());
+//				*/
+//				//更据字段拆分多条记录
+//				Map<String,Object > datas = record.getDatas();
+//				Object value = datas.get("content");
+//				String value_ = String.valueOf(value);
+//				if(value_.startsWith("[") && value_.endsWith("]")) {
+//					List<Map> list = SimpleStringUtil.json2ListObject(value_, Map.class);
+//
+//					for(int i = 0; i < list.size(); i ++){
+//						Map data_ = list.get(i);
+//						StringBuilder temp = new StringBuilder();
+//						Iterator<Map.Entry> iterator = data_.entrySet().iterator();
+//						while(iterator.hasNext()){
+//							Map.Entry entry = iterator.next();
+//							if (temp.length() > 0)
+//								temp.append(",").append(entry.getValue());
+//							else
+//								temp.append(entry.getValue());
+//
+//						}
+//						if(i > 0)
+//							builder.write(TranUtil.lineSeparator);
+//						builder.write(temp.toString());
+//
+//					}
+//
+//				}
+//				else {
+//					StringBuilder temp = new StringBuilder();
+//					for(Map.Entry<String, Object> entry:datas.entrySet()){
+//
+//							if (temp.length() > 0)
+//								temp.append(",").append(entry.getValue());
+//							else
+//								temp.append(entry.getValue());
+//
+//					}
+//
+//					builder.write(temp.toString());
+//				}
 
 
 			}
@@ -254,9 +252,9 @@ public class ES2KafkaDemo {
 //				})
 		importBuilder.setInputConfig(elasticsearchInputConfig)
 //				//添加dsl中需要用到的参数及参数值
-				.addParam("var1","v1")
-				.addParam("var2","v2")
-				.addParam("var3","v3");
+				.addJobInputParam("var1","v1")
+				.addJobInputParam("var2","v2")
+				.addJobInputParam("var3","v3");
 
 		//定时任务配置，
 		importBuilder.setFixedRate(false)//参考jdk timer task文档对fixedRate的说明
@@ -287,14 +285,14 @@ public class ES2KafkaDemo {
 			}
 
 			@Override
-			public void throwException(TaskContext taskContext, Exception e) {
+			public void throwException(TaskContext taskContext, Throwable e) {
 				logger.info(taskContext.getJobTaskMetrics().toString(),e);
 			}
 		});
 //		//设置任务执行拦截器结束，可以添加多个
 		//增量配置开始
 		importBuilder.setLastValueColumn("collecttime");//手动指定日期增量查询字段变量名称
-		importBuilder.setFromFirst(false);//setFromfirst(false)，如果作业停了，作业重启后从上次截止位置开始采集数据，
+		importBuilder.setFromFirst(true);//setFromfirst(false)，如果作业停了，作业重启后从上次截止位置开始采集数据，
 		//setFromfirst(true) 如果作业停了，作业重启后，重新开始采集数据
 		importBuilder.setLastValueStorePath("es2kafka");//记录上次采集的增量字段值的文件路径，作为下次增量（或者重启后）采集数据的起点，不同的任务这个路径要不一样
 //		importBuilder.setLastValueStoreTableName("logs");//记录上次采集的增量字段值的表，可以不指定，采用默认表名increament_tab
@@ -397,17 +395,16 @@ public class ES2KafkaDemo {
 			@Override
 			public void success(TaskCommand<Object,RecordMetadata> taskCommand, RecordMetadata result) {
 				TaskMetrics taskMetric = taskCommand.getTaskMetrics();
-				System.out.println("处理耗时："+taskCommand.getElapsed() +"毫秒");
-				System.out.println(taskCommand.getTaskMetrics());
+				logger.info(taskCommand.getTaskMetrics().toString());
 			}
 
 			@Override
 			public void error(TaskCommand<Object,RecordMetadata> taskCommand, RecordMetadata result) {
-				System.out.println(taskCommand.getTaskMetrics());
+				logger.info(taskCommand.getTaskMetrics().toString());
 			}
 
 			@Override
-			public void exception(TaskCommand<Object,RecordMetadata> taskCommand, Exception exception) {
+			public void exception(TaskCommand<Object,RecordMetadata> taskCommand, Throwable exception) {
 				logger.error(taskCommand.getTaskMetrics().toString(),exception);
 			}
 

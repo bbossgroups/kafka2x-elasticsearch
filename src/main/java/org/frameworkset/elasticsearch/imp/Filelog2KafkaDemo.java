@@ -284,7 +284,7 @@ public class Filelog2KafkaDemo {
 			}
 
 			@Override
-			public void throwException(TaskContext taskContext, Exception e) {
+			public void throwException(TaskContext taskContext, Throwable e) {
 
 			}
 		});
@@ -325,7 +325,7 @@ public class Filelog2KafkaDemo {
 			}
 
 			@Override
-			public void exception(TaskCommand<Object,RecordMetadata> taskCommand, Exception exception) {
+			public void exception(TaskCommand<Object,RecordMetadata> taskCommand, Throwable exception) {
 				logger.warn(taskCommand.getTaskMetrics().toString(),exception);
 			}
 
