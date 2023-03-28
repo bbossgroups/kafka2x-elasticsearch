@@ -342,10 +342,7 @@ public class Kafka2DBdemo {
 				System.out.println(taskCommand.getTaskMetrics());
 			}
 
-			@Override
-			public int getMaxRetry() {
-				return 0;
-			}
+
 		});
 		/**
 		 importBuilder.setEsIdGenerator(new EsIdGenerator() {
@@ -365,7 +362,6 @@ public class Kafka2DBdemo {
 		DataStream dataStream = importBuilder.builder();
 		dataStream.execute();//执行同步操作
 
-		System.out.println();
 	}
 
 }

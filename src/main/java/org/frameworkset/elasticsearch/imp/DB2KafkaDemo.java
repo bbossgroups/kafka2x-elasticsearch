@@ -304,10 +304,6 @@ public class DB2KafkaDemo {
 				System.out.println(taskCommand.getTaskMetrics());
 			}
 
-			@Override
-			public int getMaxRetry() {
-				return 0;
-			}
 		});
 
 		importBuilder.setContinueOnError(true);//任务出现异常，是否继续执行作业：true（默认值）继续执行 false 中断作业执行
