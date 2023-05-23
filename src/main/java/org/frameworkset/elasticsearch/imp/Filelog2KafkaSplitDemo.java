@@ -174,7 +174,7 @@ public class Filelog2KafkaSplitDemo {
 		kafkaOutputConfig.addKafkaProperty("value.serializer","org.apache.kafka.common.serialization.StringSerializer");
 		kafkaOutputConfig.addKafkaProperty("key.serializer","org.apache.kafka.common.serialization.LongSerializer");
 		kafkaOutputConfig.addKafkaProperty("compression.type","gzip");
-		kafkaOutputConfig.addKafkaProperty("bootstrap.servers","10.13.6.12:9092");
+		kafkaOutputConfig.addKafkaProperty("bootstrap.servers","127.0.0.1:9092");
 		kafkaOutputConfig.addKafkaProperty("batch.size","10");
 //		kafkaOutputConfig.addKafkaProperty("linger.ms","10000");
 //		kafkaOutputConfig.addKafkaProperty("buffer.memory","268435456");
@@ -182,7 +182,7 @@ public class Filelog2KafkaSplitDemo {
 		kafkaOutputConfig.setKafkaAsynSend(true);
 		importBuilder.setLogsendTaskMetric(1000l);//设置发送多少条消息后打印发送统计信息
 
-//		./kafka-console-consumer.sh --bootstrap-server 10.13.6.12:9092 --topic filelog2kafka --from-beginning
+//		./kafka-console-consumer.sh --bootstrap-server 127.0.0.1:9092 --topic filelog2kafka --from-beginning
 //指定文件中每条记录格式，不指定默认为json格式输出
 //		kafkaOutputConfig.setRecordGenerator(new RecordGenerator() {
 //			@Override

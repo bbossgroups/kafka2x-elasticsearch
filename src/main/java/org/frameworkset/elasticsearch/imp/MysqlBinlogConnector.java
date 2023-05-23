@@ -46,7 +46,7 @@ import java.util.concurrent.Future;
 public class MysqlBinlogConnector {
 	private static Logger logger = LoggerFactory.getLogger(MysqlBinlogConnector.class);
 	public void binlogClient() throws IOException {
-		BinaryLogClient client = new BinaryLogClient("10.13.11.5", 3306, "root", "123456");
+		BinaryLogClient client = new BinaryLogClient("127.0.0.1", 3306, "root", "123456");
 		EventDeserializer eventDeserializer = new EventDeserializer();
 		eventDeserializer.setCompatibilityMode(
 				EventDeserializer.CompatibilityMode.DATE_AND_TIME_AS_LONG,

@@ -108,7 +108,7 @@ public class Kafka2Kafkademo {
 		 </property>
 		 */
 
-		//bin/kafka-console-producer.sh --broker-list 10.13.11.12:9092 --topic xinkonglog
+		//bin/kafka-console-producer.sh --broker-list 127.0.0.1:9092 --topic xinkonglog
 		/**
 		 * 发送测试数据
 		 {"collecttime":1588864468000,"optime":1526747614000,"author":"duoduo","subtitle":"小康","name":"认证管理","oper":"admin","id":269389,"title":"解放","ipinfo":"{\"country\":\"中国\",\"countryId\":\"CN\",\"area\":\"\",\"areaId\":\"\",\"region\":\"浙江省\",\"regionId\":\"ZJ\",\"city\":\"杭州\",\"cityId\":\"\",\"county\":\"浙江省\",\"countyId\":\"ZJ\",\"isp\":\"Chinanet\",\"ispId\":4134,\"ip\":\"115.204.150.34\",\"geoPoint\":{\"lon\":120.1619,\"lat\":30.294}}","content":"admin(系统管理员) 退出[公共开发平台]"}
@@ -133,7 +133,7 @@ public class Kafka2Kafkademo {
 				.addKafkaConfig("auto.commit.interval.ms","5000")
 				.addKafkaConfig("auto.offset.reset","latest")
 //				.addKafkaConfig("bootstrap.servers","192.168.137.133:9093")
-				.addKafkaConfig("bootstrap.servers","10.13.11.12:9092")
+				.addKafkaConfig("bootstrap.servers","192.168.137.1:9092")
 				.addKafkaConfig("enable.auto.commit","true")
 				.addKafkaConfig("max.poll.records","500") // The maximum number of records returned in a single call to poll().
 				.setKafkaTopic("es2kafka") // kafka topic
@@ -153,7 +153,7 @@ public class Kafka2Kafkademo {
 		kafkaOutputConfig.addKafkaProperty("value.serializer","org.apache.kafka.common.serialization.StringSerializer");
 		kafkaOutputConfig.addKafkaProperty("key.serializer","org.apache.kafka.common.serialization.LongSerializer");
 		kafkaOutputConfig.addKafkaProperty("compression.type","gzip");
-		kafkaOutputConfig.addKafkaProperty("bootstrap.servers","10.13.11.12:9092");
+		kafkaOutputConfig.addKafkaProperty("bootstrap.servers","127.0.0.1:9092");
 		kafkaOutputConfig.addKafkaProperty("batch.size","10");
 //		kafkaOutputConfig.addKafkaProperty("linger.ms","10000");
 //		kafkaOutputConfig.addKafkaProperty("buffer.memory","10000");
