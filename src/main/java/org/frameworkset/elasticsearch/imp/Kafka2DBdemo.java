@@ -152,12 +152,12 @@ public class Kafka2DBdemo {
 				.addKafkaConfig("auto.offset.reset","latest")
 //				.addKafkaConfig("bootstrap.servers","192.168.137.133:9093")
 				.addKafkaConfig("bootstrap.servers","127.0.0.1:9092")
-				.addKafkaConfig("enable.auto.commit","true")
+				.addKafkaConfig("enable.auto.commit","false")//一般不要开启自动提交
 				.addKafkaConfig("max.poll.records","500") // The maximum number of records returned in a single call to poll().
 				.setKafkaTopic("xinkonglog") // kafka topic
 				.setConsumerThreads(5) // 并行消费线程数，建议与topic partitions数一致
-				.setKafkaWorkQueue(10)
-				.setKafkaWorkThreads(2)
+				.setKafkaWorkQueue(10)//每个消费线程对应的工作等待队列长度
+				.setKafkaWorkThreads(2)//每个消费线程对应的工作线程数量
 
 				.setPollTimeOut(1000) // 从kafka consumer poll(timeout)参数
 				.setValueCodec(CODEC_JSON)
