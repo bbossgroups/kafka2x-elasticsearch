@@ -230,9 +230,9 @@ public class DB2KafkaDemo {
 //		importBuilder.addFieldMapping("logContent","LOG_CONTENT");
 //		importBuilder.addFieldMapping("logOperuser","LOG_OPERUSER");
 		//设置ip地址信息库地址
-		importBuilder.setGeoipDatabase("E:/workspace/hnai/terminal/geolite2/GeoLite2-City.mmdb");
-		importBuilder.setGeoipAsnDatabase("E:/workspace/hnai/terminal/geolite2/GeoLite2-ASN.mmdb");
-		importBuilder.setGeoip2regionDatabase("E:/workspace/hnai/terminal/geolite2/ip2region.db");
+		importBuilder.setGeoipDatabase("d:/geolite2/GeoLite2-City.mmdb");
+		importBuilder.setGeoipAsnDatabase("d:/geolite2/GeoLite2-ASN.mmdb");
+		importBuilder.setGeoip2regionDatabase("d:/geolite2/ip2region.db");
 		/**
 		 * 重新设置es数据结构
 		 */
