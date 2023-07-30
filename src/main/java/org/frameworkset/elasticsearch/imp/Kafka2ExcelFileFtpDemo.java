@@ -16,9 +16,7 @@ package org.frameworkset.elasticsearch.imp;
  */
 
 
-import com.frameworkset.util.SimpleStringUtil;
 import org.frameworkset.elasticsearch.serial.SerialUtil;
-import org.frameworkset.tran.CommonRecord;
 import org.frameworkset.tran.DataRefactor;
 import org.frameworkset.tran.DataStream;
 import org.frameworkset.tran.ExportResultHandler;
@@ -28,21 +26,17 @@ import org.frameworkset.tran.ftp.FtpConfig;
 import org.frameworkset.tran.metrics.TaskMetrics;
 import org.frameworkset.tran.output.fileftp.FilenameGenerator;
 import org.frameworkset.tran.output.ftp.FtpOutConfig;
-import org.frameworkset.tran.plugin.file.output.FileOutputConfig;
+import org.frameworkset.tran.plugin.file.output.ExcelFileOutputConfig;
 import org.frameworkset.tran.plugin.kafka.input.Kafka2InputConfig;
 import org.frameworkset.tran.schedule.CallInterceptor;
 import org.frameworkset.tran.schedule.TaskContext;
 import org.frameworkset.tran.task.TaskCommand;
-import org.frameworkset.tran.util.RecordGenerator;
 import org.frameworkset.util.annotations.DateFormateMeta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.Writer;
 import java.text.DateFormat;
 import java.util.Date;
-import java.util.Map;
 
 import static org.frameworkset.tran.plugin.kafka.input.KafkaInputConfig.*;
 
@@ -54,11 +48,11 @@ import static org.frameworkset.tran.plugin.kafka.input.KafkaInputConfig.*;
  * @author biaoping.yin
  * @version 1.0
  */
-public class Kafka2FileFtpDemo {
-	private static Logger logger = LoggerFactory.getLogger(Kafka2FileFtpDemo.class);
+public class Kafka2ExcelFileFtpDemo {
+	private static Logger logger = LoggerFactory.getLogger(Kafka2ExcelFileFtpDemo.class);
 	public static void main(String args[]){
 
-		Kafka2FileFtpDemo dbdemo = new Kafka2FileFtpDemo();
+		Kafka2ExcelFileFtpDemo dbdemo = new Kafka2ExcelFileFtpDemo();
 
 		dbdemo.scheduleTimestampImportData();
 	}
@@ -72,12 +66,24 @@ public class Kafka2FileFtpDemo {
 		ImportBuilder importBuilder = new ImportBuilder();
 		importBuilder.setBatchSize(500).setFetchSize(1000);
 
+        ExcelFileOutputConfig fileOutputConfig = new ExcelFileOutputConfig();
+        fileOutputConfig.setTitle("新闻详情数据");
+        fileOutputConfig.setSheetName("2021年新闻");
 
-		FileOutputConfig fileOutputConfig = new FileOutputConfig();
-		FtpOutConfig ftpOutConfig = new FtpOutConfig();
-		ftpOutConfig.setBackupSuccessFiles(true);
-		ftpOutConfig.setTransferEmptyFiles(true);
-		ftpOutConfig.setFtpIP("192.168.137.133")
+        fileOutputConfig.addCellMapping(0,"title","文章标题")
+                .addCellMapping(1,"subtitle","文章子标题")
+                .addCellMapping(2,"newcollecttime","*新闻发布时间")
+                .addCellMapping(3,"author","*作者")
+                .addCellMapping(4,"operModule","*新闻板块")
+                .addCellMapping(5,"logContent","*新闻内容")
+                .addCellMapping(6,"logVisitorial","发布IP")
+        ;
+        fileOutputConfig.setFileDir("D:\\excelfiles\\kafkahebin");//数据生成目录
+
+        FtpOutConfig ftpOutConfig = new FtpOutConfig();
+        ftpOutConfig.setBackupSuccessFiles(true);
+        ftpOutConfig.setTransferEmptyFiles(true);
+        ftpOutConfig.setFtpIP("192.168.137.133")
                 .setFtpPort(22)
                 .setFtpUser("k8s")
                 .setFtpPassword("123456")
@@ -85,46 +91,29 @@ public class Kafka2FileFtpDemo {
                 .setKeepAliveTimeout(100000)
                 .setFailedFileResendInterval(300000)
                 .setTransferProtocol(FtpConfig.TRANSFER_PROTOCOL_SFTP);
+        fileOutputConfig.setDisableftp(true);
+        fileOutputConfig.setFtpOutConfig(ftpOutConfig);
+        fileOutputConfig.setExistFileReplace(true);//替换重名文件，如果不替换，就需要在genname方法返回带序号的文件名称
 
-		fileOutputConfig.setFtpOutConfig(ftpOutConfig);
-		fileOutputConfig.setDisableftp(false);
-		fileOutputConfig.setFileDir("D:\\workdir\\kafka2file");
-		fileOutputConfig.setMaxFileRecordSize(100);
+        fileOutputConfig.setMaxFileRecordSize(100);
         /**
          * maxForceFileThreshold 单位：秒，设置文件数据写入空闲时间阈值，如果空闲时间内没有数据到来，则进行文件切割或者flush数据到文件处理。
          * 文件切割记录规则：达到最大记录数或者空闲时间达到最大空闲时间阈值，进行文件切割 。 如果不切割文件，达到最大最大空闲时间阈值，
          * 当切割文件标识为false时，只执行flush数据操作，不关闭文件也不生成新的文件，否则生成新的文件。
          * 本属性适用于文件输出插件与kafka、mysql binlog 、fileinput等事件监听型的输入插件配合使用，其他类型输入插件无需配置。
          */
-        fileOutputConfig.setMaxForceFileThreshold(60);
-		fileOutputConfig.setFilenameGenerator(new FilenameGenerator() {
-			@Override
-			public String genName(TaskContext taskContext, int fileSeq) {
+        fileOutputConfig.setMaxForceFileThreshold(30);
+        fileOutputConfig.setFilenameGenerator(new FilenameGenerator() {
+            @Override
+            public String genName(TaskContext taskContext, int fileSeq) {
+                Date date = taskContext.getJobStartTime();
+                String time = DateFormateMeta.format(date,"yyyyMMddHHmmss");
+                return "kafka-"+time+"-"+fileSeq+".xlsx";
+            }
+        });
 
-                String time = DateFormateMeta.format(taskContext.getJobStartTime(),"yyyyMMddHHmmss");
-				return "HN_BOSS_TRADE_"+time+"-"+fileSeq + ".txt";
-			}
-		});
-		fileOutputConfig.setRecordGenerator(new RecordGenerator() {
-			@Override
-			public void buildRecord(Context taskContext, CommonRecord record, Writer builder) {
-				Map datas = record.getDatas();
-                logger.info(SimpleStringUtil.object2json(datas));
-				datas.forEach((key,value)->{
-					try {
-						builder.write(String.valueOf(key));
-						builder.write("=");
-						builder.write(String.valueOf(value));
-						builder.write(",");
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				});
-//				SerialUtil.normalObject2json(record.getDatas(),builder);
-
-			}
-		});
-		importBuilder.setOutputConfig(fileOutputConfig);
+        importBuilder.setOutputConfig(fileOutputConfig);
+		 
 		//kafka相关配置参数
 		/**
 		 *
@@ -185,7 +174,7 @@ public class Kafka2FileFtpDemo {
 		kafka2InputConfig.setMetricsInterval(30 * 1000L);//30秒做一次任务拦截调用，
 		kafka2InputConfig//.addKafkaConfig("value.deserializer","org.apache.kafka.common.serialization.StringDeserializer")
 				//.addKafkaConfig("key.deserializer","org.apache.kafka.common.serialization.LongDeserializer")
-				.addKafkaConfig("group.id","trandbtest") // 消费组ID
+				.addKafkaConfig("group.id","exceltest") // 消费组ID
 				.addKafkaConfig("session.timeout.ms","30000")
 				.addKafkaConfig("auto.commit.interval.ms","5000")
 //				.addKafkaConfig("auto.offset.reset","latest")

@@ -16,6 +16,7 @@ package org.frameworkset.elasticsearch.imp;
  */
 
 
+import com.frameworkset.util.SimpleStringUtil;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.frameworkset.elasticsearch.ElasticSearchHelper;
 import org.frameworkset.elasticsearch.client.ClientInterface;
@@ -150,7 +151,7 @@ public class ES2KafkaDemo {
 		kafkaOutputConfig.addKafkaProperty("value.serializer","org.apache.kafka.common.serialization.StringSerializer");
 		kafkaOutputConfig.addKafkaProperty("key.serializer","org.apache.kafka.common.serialization.LongSerializer");
 		kafkaOutputConfig.addKafkaProperty("compression.type","gzip");
-		kafkaOutputConfig.addKafkaProperty("bootstrap.servers","127.0.0.1:9092");
+		kafkaOutputConfig.addKafkaProperty("bootstrap.servers","192.168.137.133:9092");
 //		kafkaOutputConfig.addKafkaProperty("bootstrap.servers","127.0.0.1:9092");
 
 		kafkaOutputConfig.addKafkaProperty("batch.size","10");
@@ -165,6 +166,7 @@ public class ES2KafkaDemo {
 			public void buildRecord(Context taskContext, CommonRecord record, Writer builder) throws IOException {
 				//record.setRecordKey("xxxxxx"); //指定记录key
 
+               logger.info( SimpleStringUtil.object2json(record.getDatas()));
 				//直接将记录按照json格式输出到文本文件中
 				SerialUtil.normalObject2json(record.getDatas(),//获取记录中的字段数据并转换为json格式
 						builder);
