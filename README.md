@@ -26,7 +26,7 @@ Spring boot： 1.x,2.x,+
 <dependency>
   <groupId>com.bbossgroups.plugins</groupId>
   <artifactId>bboss-datatran-kafka2x</artifactId>
-  <version>7.0.6</version>
+  <version>7.0.7</version>
   <scope>compile</scope>
 </dependency>
 ```
