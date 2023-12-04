@@ -78,7 +78,7 @@ public class Kafka2ExcelFileFtpDemo {
                 .addCellMapping(5,"logContent","*新闻内容")
                 .addCellMapping(6,"logVisitorial","发布IP")
         ;
-        fileOutputConfig.setFileDir("D:\\excelfiles\\kafkahebin");//数据生成目录
+        fileOutputConfig.setFileDir("c:\\excelfiles\\kafkahebin");//数据生成目录
 
         FtpOutConfig ftpOutConfig = new FtpOutConfig();
         ftpOutConfig.setBackupSuccessFiles(true);
@@ -181,7 +181,7 @@ public class Kafka2ExcelFileFtpDemo {
                 .addKafkaConfig("auto.offset.reset","earliest")
 
 //				.addKafkaConfig("bootstrap.servers","192.168.137.133:9093")
-				.addKafkaConfig("bootstrap.servers","192.168.137.133:9092")
+				.addKafkaConfig("bootstrap.servers","10.13.6.127:9092")
 				.addKafkaConfig("enable.auto.commit","false")
 				.addKafkaConfig("max.poll.records","500") // The maximum number of records returned in a single call to poll().
 				.setKafkaTopic("es2kafka") // kafka topic
@@ -230,10 +230,7 @@ public class Kafka2ExcelFileFtpDemo {
 //		importBuilder.addFieldMapping("logContent","LOG_CONTENT");
 //		importBuilder.addFieldMapping("logOperuser","LOG_OPERUSER");
 
-		//设置ip地址信息库地址
-		importBuilder.setGeoipDatabase("d:/geolite2/GeoLite2-City.mmdb");
-		importBuilder.setGeoipAsnDatabase("d:/geolite2/GeoLite2-ASN.mmdb");
-		importBuilder.setGeoip2regionDatabase("d:/geolite2/ip2region.db");
+
 		importBuilder.addCallInterceptor(new CallInterceptor() {
 			@Override
 			public void preCall(TaskContext taskContext) {
