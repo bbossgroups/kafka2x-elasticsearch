@@ -151,7 +151,7 @@ public class ES2KafkaDemo {
 		kafkaOutputConfig.addKafkaProperty("value.serializer","org.apache.kafka.common.serialization.StringSerializer");
 		kafkaOutputConfig.addKafkaProperty("key.serializer","org.apache.kafka.common.serialization.LongSerializer");
 		kafkaOutputConfig.addKafkaProperty("compression.type","gzip");
-		kafkaOutputConfig.addKafkaProperty("bootstrap.servers","192.168.137.133:9092");
+		kafkaOutputConfig.addKafkaProperty("bootstrap.servers","10.13.6.127:9092");
 //		kafkaOutputConfig.addKafkaProperty("bootstrap.servers","127.0.0.1:9092");
 
 		kafkaOutputConfig.addKafkaProperty("batch.size","10");
@@ -332,9 +332,9 @@ public class ES2KafkaDemo {
 //		importBuilder.addFieldMapping("logOperuser","LOG_OPERUSER");
 
 		//设置ip地址信息库地址
-		importBuilder.setGeoipDatabase("d:/geolite2/GeoLite2-City.mmdb");
-		importBuilder.setGeoipAsnDatabase("d:/geolite2/GeoLite2-ASN.mmdb");
-		importBuilder.setGeoip2regionDatabase("d:/geolite2/ip2region.db");
+		importBuilder.setGeoipDatabase("c:/data/geolite2/GeoLite2-City.mmdb");
+		importBuilder.setGeoipAsnDatabase("c:/data/geolite2/GeoLite2-ASN.mmdb");
+		importBuilder.setGeoip2regionDatabase("c:/data/geolite2/ip2region.db");
 		/**
 		 * 重新设置es数据结构
 		 */
@@ -375,6 +375,8 @@ public class ES2KafkaDemo {
 //				Date optime = context.getDateValue("LOG_OPERTIME",dateFormat);
 //				context.addFieldValue("logOpertime",optime);
 				context.addFieldValue("newcollecttime",new Date());
+                //设置记录级别的kafka主题
+                context.setKafkaTopic("es2kafka1");
 
 				/**
 				 //关联查询数据,单值查询
