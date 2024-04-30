@@ -181,7 +181,7 @@ public class Kafka2ExcelFileFtpDemo {
                 .addKafkaConfig("auto.offset.reset","earliest")
 
 //				.addKafkaConfig("bootstrap.servers","192.168.137.133:9093")
-				.addKafkaConfig("bootstrap.servers","10.13.6.127:9092")
+				.addKafkaConfig("bootstrap.servers","101.13.6.127:9092")
 				.addKafkaConfig("enable.auto.commit","false")
 				.addKafkaConfig("max.poll.records","500") // The maximum number of records returned in a single call to poll().
 				.setKafkaTopic("es2kafka") // kafka topic
