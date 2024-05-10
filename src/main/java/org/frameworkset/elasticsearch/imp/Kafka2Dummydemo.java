@@ -25,6 +25,7 @@ import org.frameworkset.tran.config.ImportBuilder;
 import org.frameworkset.tran.context.Context;
 import org.frameworkset.tran.plugin.dummy.output.DummyOutputConfig;
 import org.frameworkset.tran.plugin.kafka.input.Kafka2InputConfig;
+import org.frameworkset.tran.schedule.TaskContext;
 import org.frameworkset.tran.task.TaskCommand;
 import org.frameworkset.tran.util.RecordGenerator;
 import org.slf4j.Logger;
@@ -129,10 +130,10 @@ public class Kafka2Dummydemo {
 				.addKafkaConfig("auto.commit.interval.ms","5000")
 				.addKafkaConfig("auto.offset.reset","latest")
 //				.addKafkaConfig("bootstrap.servers","192.168.137.133:9093")
-				.addKafkaConfig("bootstrap.servers","127.0.0.1:9092")
+				.addKafkaConfig("bootstrap.servers","192.168.137.133:9092")
 				.addKafkaConfig("enable.auto.commit","true")
 				.addKafkaConfig("max.poll.records","500") // The maximum number of records returned in a single call to poll().
-				.setKafkaTopic("es2kafka") // kafka topic
+				.setKafkaTopic("db2kafka") // kafka topic
 				.setConsumerThreads(5) // 并行消费线程数，建议与topic partitions数一致
 				.setKafkaWorkQueue(10)
 				.setKafkaWorkThreads(2)
@@ -145,7 +146,7 @@ public class Kafka2Dummydemo {
 		DummyOutputConfig dummyOutputConfig = new DummyOutputConfig();
 		dummyOutputConfig.setRecordGenerator(new RecordGenerator() {
 			@Override
-			public void buildRecord(Context taskContext, CommonRecord record, Writer builder) throws Exception{
+			public void buildRecord(TaskContext taskContext, CommonRecord record, Writer builder) throws Exception{
 				SimpleStringUtil.object2json(record.getDatas(),builder);
 
 			}

@@ -163,14 +163,14 @@ public class ES2KafkaDemo {
 //指定文件中每条记录格式，不指定默认为json格式输出
 		kafkaOutputConfig.setRecordGenerator(new RecordGenerator() {
 			@Override
-			public void buildRecord(Context taskContext, CommonRecord record, Writer builder) throws IOException {
+			public void buildRecord(TaskContext taskContext, CommonRecord record, Writer builder) throws IOException {
 				//record.setRecordKey("xxxxxx"); //指定记录key
 
                logger.info( SimpleStringUtil.object2json(record.getDatas()));
 				//直接将记录按照json格式输出到文本文件中
 				SerialUtil.normalObject2json(record.getDatas(),//获取记录中的字段数据并转换为json格式
 						builder);
-//				String data = (String)taskContext.getTaskContext().getTaskData("data");//从任务上下文中获取本次任务执行前设置时间戳
+//				String data = (String)taskContext.getTaskData("data");//从任务上下文中获取本次任务执行前设置时间戳
 //
 ////          System.out.println(data);
 //

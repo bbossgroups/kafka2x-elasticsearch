@@ -107,7 +107,7 @@ public class Kafka2FileFtpDemo {
 		});
 		fileOutputConfig.setRecordGenerator(new RecordGenerator() {
 			@Override
-			public void buildRecord(Context taskContext, CommonRecord record, Writer builder) {
+			public void buildRecord(TaskContext taskContext, CommonRecord record, Writer builder) {
 				Map datas = record.getDatas();
                 logger.info(SimpleStringUtil.object2json(datas));
 				datas.forEach((key,value)->{

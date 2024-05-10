@@ -92,7 +92,7 @@
 //        //指定文件中每条记录格式，不指定默认为json格式输出
 //        kafkaOutputConfig.setRecordGenerator(new RecordGenerator() {
 //            @Override
-//            public void buildRecord(Context taskContext, CommonRecord record, Writer builder) {
+//            public void buildRecord(TaskContext taskContext, CommonRecord record, Writer builder) {
 //                //record.setRecordKey("xxxxxx"); //指定记录key
 //                //直接将记录按照json格式输出到文本文件中
 //              //如果不想有空值字段到消息中，可以在这里处理一下datas，把空值字段移除掉，然后再序列化就可以了  
