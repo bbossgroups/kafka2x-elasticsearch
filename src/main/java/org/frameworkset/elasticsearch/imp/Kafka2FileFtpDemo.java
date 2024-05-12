@@ -317,21 +317,21 @@ public class Kafka2FileFtpDemo {
 			}
 		});
 		//映射和转换配置结束
-		importBuilder.setExportResultHandler(new ExportResultHandler<String,String>() {
+		importBuilder.setExportResultHandler(new ExportResultHandler<String>() {
 			@Override
-			public void success(TaskCommand<String,String> taskCommand, String result) {
+			public void success(TaskCommand<String> taskCommand, String result) {
 				TaskMetrics taskMetric = taskCommand.getTaskMetrics();
 				logger.debug("处理耗时："+taskCommand.getElapsed() +"毫秒");
 				logger.debug(taskCommand.getTaskMetrics().toString());
 			}
 
 			@Override
-			public void error(TaskCommand<String,String> taskCommand, String result) {
+			public void error(TaskCommand<String> taskCommand, String result) {
 				logger.warn(taskCommand.getTaskMetrics().toString());
 			}
 
 			@Override
-			public void exception(TaskCommand<String,String> taskCommand, Throwable exception) {
+			public void exception(TaskCommand<String> taskCommand, Throwable exception) {
 				logger.warn(taskCommand.getTaskMetrics().toString(),exception);
 			}
 

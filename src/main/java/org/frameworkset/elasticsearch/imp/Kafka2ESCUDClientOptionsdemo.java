@@ -280,19 +280,19 @@ public class Kafka2ESCUDClientOptionsdemo {
 		importBuilder.setQueue(10);//设置批量导入线程池等待队列长度
 		importBuilder.setThreadCount(50);//设置批量导入线程池工作线程数量
 		importBuilder.setContinueOnError(true);//任务出现异常，是否继续执行作业：true（默认值）继续执行 false 中断作业执行
-		importBuilder.setExportResultHandler(new ExportResultHandler<String,String>() {
+		importBuilder.setExportResultHandler(new ExportResultHandler<String>() {
 			@Override
-			public void success(TaskCommand<String,String> taskCommand, String result) {
+			public void success(TaskCommand<String> taskCommand, String result) {
 				System.out.println(taskCommand.getTaskMetrics());
 			}
 
 			@Override
-			public void error(TaskCommand<String,String> taskCommand, String result) {
+			public void error(TaskCommand<String> taskCommand, String result) {
 				System.out.println(taskCommand.getTaskMetrics());
 			}
 
 			@Override
-			public void exception(TaskCommand<String,String> taskCommand, Throwable exception) {
+			public void exception(TaskCommand<String> taskCommand, Throwable exception) {
 				System.out.println(taskCommand.getTaskMetrics());
 				exception.printStackTrace();
 			}

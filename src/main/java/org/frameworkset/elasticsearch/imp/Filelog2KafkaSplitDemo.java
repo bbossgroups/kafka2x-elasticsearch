@@ -353,21 +353,21 @@ public class Filelog2KafkaSplitDemo {
 		//数据异步同步通道缓存队列设置，默认为10
 		importBuilder.setTranDataBufferQueue(5);
 		//映射和转换配置结束
-		importBuilder.setExportResultHandler(new ExportResultHandler<Object, RecordMetadata>() {
+		importBuilder.setExportResultHandler(new ExportResultHandler<RecordMetadata>() {
 			@Override
-			public void success(TaskCommand<Object,RecordMetadata> taskCommand, RecordMetadata result) {
+			public void success(TaskCommand<RecordMetadata> taskCommand, RecordMetadata result) {
 				TaskMetrics taskMetric = taskCommand.getTaskMetrics();
 //				logger.debug("处理耗时："+taskCommand.getElapsed() +"毫秒");
 //				logger.debug(taskCommand.getTaskMetrics().toString());
 			}
 
 			@Override
-			public void error(TaskCommand<Object,RecordMetadata> taskCommand, RecordMetadata result) {
+			public void error(TaskCommand<RecordMetadata> taskCommand, RecordMetadata result) {
 				logger.warn(taskCommand.getTaskMetrics().toString());
 			}
 
 			@Override
-			public void exception(TaskCommand<Object,RecordMetadata> taskCommand, Throwable exception) {
+			public void exception(TaskCommand<RecordMetadata> taskCommand, Throwable exception) {
 				logger.warn(taskCommand.getTaskMetrics().toString(),exception);
 			}
 
