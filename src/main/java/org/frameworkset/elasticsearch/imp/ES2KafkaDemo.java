@@ -158,8 +158,8 @@ public class ES2KafkaDemo {
 //		kafkaOutputConfig.addKafkaProperty("linger.ms","10000");
 //		kafkaOutputConfig.addKafkaProperty("buffer.memory","10000");
 		kafkaOutputConfig.setKafkaAsynSend(true);
-		kafkaOutputConfig.setEnableMetricsAgg(true);
-		kafkaOutputConfig.setMetricsAggWindow(60);
+//		kafkaOutputConfig.setEnableMetricsAgg(true);
+//		kafkaOutputConfig.setMetricsAggWindow(60);
 //指定文件中每条记录格式，不指定默认为json格式输出
 		kafkaOutputConfig.setRecordGenerator(new RecordGenerator() {
 			@Override
