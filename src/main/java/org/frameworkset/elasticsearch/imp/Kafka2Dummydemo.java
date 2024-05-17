@@ -131,7 +131,7 @@ public class Kafka2Dummydemo {
 				.addKafkaConfig("auto.offset.reset","latest")
 //				.addKafkaConfig("bootstrap.servers","192.168.137.133:9093")
 				.addKafkaConfig("bootstrap.servers","192.168.137.133:9092")
-				.addKafkaConfig("enable.auto.commit","true")
+				.addKafkaConfig("enable.auto.commit","false")
 				.addKafkaConfig("max.poll.records","500") // The maximum number of records returned in a single call to poll().
 				.setKafkaTopic("db2kafka") // kafka topic
 				.setConsumerThreads(5) // 并行消费线程数，建议与topic partitions数一致

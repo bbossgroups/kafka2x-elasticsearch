@@ -16,43 +16,42 @@ package org.frameworkset.elasticsearch.imp;
  */
 
 
-import com.frameworkset.util.SimpleStringUtil;
 import org.apache.kafka.clients.producer.RecordMetadata;
-import org.frameworkset.elasticsearch.entity.KeyMap;
+import org.frameworkset.elasticsearch.serial.SerialUtil;
+import org.frameworkset.spi.geoip.IpInfo;
+import org.frameworkset.tran.CommonRecord;
 import org.frameworkset.tran.DataRefactor;
 import org.frameworkset.tran.DataStream;
 import org.frameworkset.tran.ExportResultHandler;
-import org.frameworkset.tran.Record;
 import org.frameworkset.tran.config.ImportBuilder;
 import org.frameworkset.tran.context.Context;
-import org.frameworkset.tran.input.file.*;
 import org.frameworkset.tran.metrics.TaskMetrics;
-import org.frameworkset.tran.plugin.file.input.FileInputConfig;
+import org.frameworkset.tran.plugin.db.input.DBInputConfig;
 import org.frameworkset.tran.plugin.kafka.output.Kafka2OutputConfig;
-import org.frameworkset.tran.record.SplitHandler;
 import org.frameworkset.tran.schedule.CallInterceptor;
+import org.frameworkset.tran.schedule.ImportIncreamentConfig;
 import org.frameworkset.tran.schedule.TaskContext;
 import org.frameworkset.tran.task.TaskCommand;
+import org.frameworkset.tran.util.RecordGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.io.Writer;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
- * <p>Description: 采集日志文件数据并发送kafka作业，如需调试同步功能，直接运行main方法</p>
+ * <p>Description: 导出关系数据库数据并发送kafka同步作业程序，如需调试同步功能，直接运行main方法</p>
  * <p></p>
  * <p>Copyright (c) 2018</p>
  * @Date 2018/9/27 20:38
  * @author biaoping.yin
  * @version 1.0
  */
-public class Filelog2KafkaSplitDemo {
-	private static Logger logger = LoggerFactory.getLogger(Filelog2KafkaSplitDemo.class);
+public class DB2ParrelKafkaDemo {
+	private static Logger logger = LoggerFactory.getLogger(DB2ParrelKafkaDemo.class);
 	public static void main(String args[]){
-
-		Filelog2KafkaSplitDemo dbdemo = new Filelog2KafkaSplitDemo();
+		DB2ParrelKafkaDemo dbdemo = new DB2ParrelKafkaDemo();
 
 		dbdemo.scheduleTimestampImportData();
 	}
@@ -64,44 +63,7 @@ public class Filelog2KafkaSplitDemo {
 	 */
 	public void scheduleTimestampImportData(){
 		ImportBuilder importBuilder = new ImportBuilder();
-		importBuilder.setFetchSize(300);
-		importBuilder.setAsynFlushStatus(true);
-		importBuilder.setSplitFieldName("@message");
-		importBuilder.setSplitHandler(new SplitHandler() {
-			/**
-			 * 将记录字段值splitValue切割为多条记录，如果方法返回null，则继续将原记录写入目标库
-			 * @param taskContext
-			 * @param record
-			 * @param fieldValue
-			 * @return List<KeyMap<String, Object>> KeyMap是LinkedHashMap的子类，添加key字段，如果是往kafka推送数据，可以设置推送的key
-			 */
-			@Override
-			public List<KeyMap> splitField(TaskContext taskContext,//调度任务上下文
-										   Record record,//原始记录对象
-										   Object fieldValue) {//待切割的字段值
-				//如果@message不是一个数组格式的json，那么就不要拆分原来的记录，直接返回null就可以了
-				String data =  String.valueOf(fieldValue);
-				if(!data.startsWith("["))
-					return null;
-				//把@message字段进行切割为一个List<Map>对象
-				List<Map> datas = SimpleStringUtil.json2ListObject(data, Map.class);
-				List<KeyMap> splitDatas =  new ArrayList<>(datas.size());
-				for(int i = 0; i < datas.size(); i ++){
-					Map map = datas.get(i);
-					KeyMap keyMap = new KeyMap();
-					keyMap.put("@message",map);//然后循环将map再放回新记录，作为新记录字段@message的值
-					splitDatas.add(keyMap);
-				}
-				return splitDatas;
-			}
-		});
-		//将@message名称映射转换为message
-		importBuilder.addFieldMapping("@message","message");
-
-//		importBuilder.addIgnoreFieldMapping("@message");
-
-//		importBuilder.addFieldMapping("@timestamp","timestamp");
-
+//		importBuilder.setFetchSize(300);
 		//kafka相关配置参数
 		/**
 		 *
@@ -170,108 +132,73 @@ public class Filelog2KafkaSplitDemo {
 		// kafka服务器参数配置
 		// kafka 2x 客户端参数项及说明类：org.apache.kafka.clients.consumer.ConsumerConfig
 		Kafka2OutputConfig kafkaOutputConfig = new Kafka2OutputConfig();
-		kafkaOutputConfig.setTopic("filelog2kafka");//设置kafka主题名称
+		kafkaOutputConfig.setTopic("db2kafka");
 		kafkaOutputConfig.addKafkaProperty("value.serializer","org.apache.kafka.common.serialization.StringSerializer");
 		kafkaOutputConfig.addKafkaProperty("key.serializer","org.apache.kafka.common.serialization.LongSerializer");
 		kafkaOutputConfig.addKafkaProperty("compression.type","gzip");
 		kafkaOutputConfig.addKafkaProperty("bootstrap.servers","192.168.137.133:9092");
 		kafkaOutputConfig.addKafkaProperty("batch.size","10");
 //		kafkaOutputConfig.addKafkaProperty("linger.ms","10000");
-//		kafkaOutputConfig.addKafkaProperty("buffer.memory","268435456");
-		kafkaOutputConfig.addKafkaProperty("max.block.ms","600000");
+//		kafkaOutputConfig.addKafkaProperty("buffer.memory","10000");
 		kafkaOutputConfig.setKafkaAsynSend(true);
-		importBuilder.setLogsendTaskMetric(1000l);//设置发送多少条消息后打印发送统计信息
-
-//		./kafka-console-consumer.sh --bootstrap-server 127.0.0.1:9092 --topic filelog2kafka --from-beginning
 //指定文件中每条记录格式，不指定默认为json格式输出
-//		kafkaOutputConfig.setRecordGenerator(new RecordGenerator() {
-//			@Override
-//			public void buildRecord(TaskContext taskContext, CommonRecord record, Writer builder) {
-//				//record.setRecordKey("xxxxxx"); //指定记录key
-//				//直接将记录按照json格式输出到文本文件中
-//				SerialUtil.normalObject2json(record.getDatas(),//获取记录中的字段数据并转换为json格式
-//						builder);
-////          System.out.println(data);
-//
-//			}
-//		});
+		kafkaOutputConfig.setRecordGenerator(new RecordGenerator() {
+			@Override
+			public void buildRecord(TaskContext taskContext, CommonRecord record, Writer builder) {
+				//直接将记录按照json格式输出到文本文件中
+				SerialUtil.normalObject2json(record.getDatas(),//获取记录中的字段数据
+						builder);
+				String data = (String)taskContext.getTaskData("data");//从任务上下文中获取本次任务执行前设置时间戳
+//          System.out.println(data);
+
+			}
+		});
 		importBuilder.setOutputConfig(kafkaOutputConfig);
+//		importBuilder.setIncreamentEndOffset(300);//单位秒，同步从上次同步截止时间当前时间前5分钟的数据，下次继续从上次截止时间开始同步数据,对增量时间戳数据同步起作用
+		DBInputConfig dbInputConfig = new DBInputConfig();
+		dbInputConfig.setSqlFilepath("sqlFile.xml")
+				.setSqlName("parreldemoexport").setDbName("test");
+        dbInputConfig.setParallelDatarefactor(true);//并行执行datarefactor
+		importBuilder.setInputConfig(dbInputConfig);
+		//定时任务配置，
+		importBuilder.setFixedRate(false)//参考jdk timer task文档对fixedRate的说明
+//					 .setScheduleDate(date) //指定任务开始执行时间：日期
+				.setDeyLay(1000L) // 任务延迟执行deylay毫秒后执行
+				.setPeriod(30000L); //每隔period毫秒执行，如果不设置，只执行一次
 		//定时任务配置结束
 
-		FileInputConfig config = new FileInputConfig();
-//		config.setCharsetEncode("GB2312");//全局字符集配置
-		//.*.txt.[0-9]+$
-		//[17:21:32:388]
-//		config.addConfig(new FileConfig("D:\\ecslog",//指定目录
-//				"error-2021-03-27-1.log",//指定文件名称，可以是正则表达式
-//				"^\\[[0-9]{2}:[0-9]{2}:[0-9]{2}:[0-9]{3}\\]")//指定多行记录的开头识别标记，正则表达式
-//				.setCloseEOF(false)//已经结束的文件内容采集完毕后关闭文件对应的采集通道，后续不再监听对应文件的内容变化
-////				.setMaxBytes(1048576)//控制每条日志的最大长度，超过长度将被截取掉
-//				//.setStartPointer(1000l)//设置采集的起始位置，日志内容偏移量
-//				.addField("tag","error") //添加字段tag到记录中
-//				.setExcludeLines(new String[]{"\\[DEBUG\\]"}));//不采集debug日志
+		//设置任务执行拦截器，可以添加多个
+		importBuilder.addCallInterceptor(new CallInterceptor() {
+			@Override
+			public void preCall(TaskContext taskContext) {
 
-//		config.addConfig(new FileConfig("D:\\workspace\\bbossesdemo\\filelog-elasticsearch\\",//指定目录
-//						"es.log",//指定文件名称，可以是正则表达式
-//						"^\\[[0-9]{2}:[0-9]{2}:[0-9]{2}:[0-9]{3}\\]")//指定多行记录的开头识别标记，正则表达式
-//						.setCloseEOF(false)//已经结束的文件内容采集完毕后关闭文件对应的采集通道，后续不再监听对应文件的内容变化
-//						.addField("tag","elasticsearch")//添加字段tag到记录中
-//				//.setExcludeLines(new String[]{".*endpoint.*"}))//采集不包含endpoint的日志
-//		);
-		config.addConfig(new FileConfig()//指定多行记录的开头识别标记，正则表达式
-						.setSourcePath("C:\\workspace\\bbossgroups\\bboss-demos\\etl-elasticsearch\\kafka2x-elasticsearch\\data\\").setFileFilter(new FileFilter() {
-							@Override
-							public boolean accept(FilterFileInfo filterFileInfo, FileConfig fileConfig) {
-								return filterFileInfo.getFileName().endsWith(".json");
-							}
-						})//指定文件过滤器.setCloseEOF(false)//已经结束的文件内容采集完毕后关闭文件对应的采集通道，后续不再监听对应文件的内容变化
-						.setCloseEOF(true)
-//						.setCharsetEncode("GB2312") //文件集级别配置
-//				.setIncludeLines(new String[]{".*ERROR.*"})//采集包含ERROR的日志
-				//.setExcludeLines(new String[]{".*endpoint.*"}))//采集不包含endpoint的日志
-		);
-		/**
-		 * 启用元数据信息到记录中，元数据信息以map结构方式作为@filemeta字段值添加到记录中，文件插件支持的元信息字段如下：
-		 * hostIp：主机ip
-		 * hostName：主机名称
-		 * filePath： 文件路径
-		 * timestamp：采集的时间戳
-		 * pointer：记录对应的截止文件指针,long类型
-		 * fileId：linux文件号，windows系统对应文件路径
-		 * 例如：
-		 * {
-		 *   "_index": "filelog",
-		 *   "_type": "_doc",
-		 *   "_id": "HKErgXgBivowv_nD0Jhn",
-		 *   "_version": 1,
-		 *   "_score": null,
-		 *   "_source": {
-		 *     "title": "解放",
-		 *     "subtitle": "小康",
-		 *     "ipinfo": "",
-		 *     "newcollecttime": "2021-03-30T03:27:04.546Z",
-		 *     "author": "张无忌",
-		 *     "@filemeta": {
-		 *       "path": "D:\\ecslog\\error-2021-03-27-1.log",
-		 *       "hostname": "",
-		 *       "pointer": 3342583,
-		 *       "hostip": "",
-		 *       "timestamp": 1617074824542,
-		 *       "fileId": "D:/ecslog/error-2021-03-27-1.log"
-		 *     },
-		 *     "@message": "[18:04:40:161] [INFO] - org.frameworkset.tran.schedule.ScheduleService.externalTimeSchedule(ScheduleService.java:192) - Execute schedule job Take 3 ms"
-		 *   }
-		 * }
-		 *
-		 * true 开启 false 关闭
-		 */
-		config.setEnableMeta(true);
-		importBuilder.setInputConfig(config);
+				String formate = "yyyyMMddHHmmss";
+				//HN_BOSS_TRADE00001_YYYYMMDDHHMM_000001.txt
+				SimpleDateFormat dateFormat = new SimpleDateFormat(formate);
+				String time = dateFormat.format(new Date());
+				//可以在preCall方法中设置任务级别全局变量，然后在其他任务级别和记录级别接口中通过taskContext.getTaskData("time");方法获取time参数
+				taskContext.addTaskData("time",time);
 
-		importBuilder.setFromFirst(false);//setFromfirst(false)，如果作业停了，作业重启后从上次截止位置开始采集数据，
+			}
+
+			@Override
+			public void afterCall(TaskContext taskContext) {
+				System.out.println("afterCall 1");
+			}
+
+			@Override
+			public void throwException(TaskContext taskContext, Throwable e) {
+				System.out.println("throwException 1");
+			}
+		});
+//		//设置任务执行拦截器结束，可以添加多个
+		//增量配置开始
+		importBuilder.setLastValueColumn("LOG_ID");//手动指定日期增量查询字段变量名称
+		importBuilder.setFromFirst(true);//setFromfirst(false)，如果作业停了，作业重启后从上次截止位置开始采集数据，
 		//setFromfirst(true) 如果作业停了，作业重启后，重新开始采集数据
-		importBuilder.setLastValueStorePath("filelogsplit2kafka");//记录上次采集的增量字段值的文件路径，作为下次增量（或者重启后）采集数据的起点，不同的任务这个路径要不一样
+		importBuilder.setLastValueStorePath("db2kafka");//记录上次采集的增量字段值的文件路径，作为下次增量（或者重启后）采集数据的起点，不同的任务这个路径要不一样
 //		importBuilder.setLastValueStoreTableName("logs");//记录上次采集的增量字段值的表，可以不指定，采用默认表名increament_tab
+		importBuilder.setLastValueType(ImportIncreamentConfig.NUMBER_TYPE);//如果没有指定增量查询字段名称，则需要指定字段类型：ImportIncreamentConfig.NUMBER_TYPE 数字类型
 		// 或者ImportIncreamentConfig.TIMESTAMP_TYPE 日期类型
 		//指定增量同步的起始时间
 //		importBuilder.setLastValue(new Date());
@@ -299,39 +226,14 @@ public class Filelog2KafkaSplitDemo {
 //		testObject.setId("testid");
 //		testObject.setName("jackson");
 //		importBuilder.addFieldValue("testObject",testObject);
-//		importBuilder.addFieldValue("author","张无忌");
+		importBuilder.addFieldValue("author","张无忌");
 //		importBuilder.addFieldMapping("operModule","OPER_MODULE");
 //		importBuilder.addFieldMapping("logContent","LOG_CONTENT");
 //		importBuilder.addFieldMapping("logOperuser","LOG_OPERUSER");
-
 		//设置ip地址信息库地址
 		importBuilder.setGeoipDatabase("c:/geolite2/GeoLite2-City.mmdb");
 		importBuilder.setGeoipAsnDatabase("c:/geolite2/GeoLite2-ASN.mmdb");
 		importBuilder.setGeoip2regionDatabase("c:/geolite2/ip2region.db");
-		importBuilder.addCallInterceptor(new CallInterceptor() {
-			@Override
-			public void preCall(TaskContext taskContext) {
-				//文件开始被采集前调用
-				FileTaskContext fileTaskContext = (FileTaskContext)taskContext;
-				FileInfo fileInfo = fileTaskContext.getFileInfo();
-				taskContext.addTaskData("fileInfo",fileInfo);
-			}
-
-			@Override
-			public void afterCall(TaskContext taskContext) {
-				//文件采集完毕后执行，可以归档文件
-				FileTaskContext fileTaskContext = (FileTaskContext)taskContext;
-				FileInfo fileInfo = fileTaskContext.getFileInfo();
-			}
-
-			@Override
-			public void throwException(TaskContext taskContext, Throwable e) {
-
-			}
-		});
-		/**
-		 * 重新设置es数据结构
-		 */
 		/**
 		 * 重新设置es数据结构
 		 */
@@ -343,46 +245,78 @@ public class Filelog2KafkaSplitDemo {
 //					context.setDrop(true);
 //					return;
 //				}
+				String time = (String)context.getTaskContext().getTaskData("time");
 //				System.out.println(data);
-//				FileInfo fileInfo = (FileInfo) context.getTaskContext().getTaskData("fileInfo");
-				//为每条记录添加唯一标识
-				context.addFieldValue("uuid",SimpleStringUtil.getUUID());
-//
+
+//				context.addFieldValue("author","duoduo");//将会覆盖全局设置的author变量
+				context.addFieldValue("title","解放");
+				context.addFieldValue("subtitle","小康");
+
+//				context.addIgnoreFieldMapping("title");
+				//上述三个属性已经放置到docInfo中，如果无需再放置到索引文档中，可以忽略掉这些属性
+//				context.addIgnoreFieldMapping("author");
+
+//				//修改字段名称title为新名称newTitle，并且修改字段的值
+//				context.newName2ndData("title","newTitle",(String)context.getValue("title")+" append new Value");
+				/**
+				 * 获取ip对应的运营商和区域信息
+				 */
+				IpInfo ipInfo = (IpInfo)context.getIpInfo("LOG_VISITORIAL");
+				if(ipInfo != null)
+					context.addFieldValue("ipinfo", ipInfo);
+				else{
+					context.addFieldValue("ipinfo", "");
+				}
+
+				context.addFieldValue("newcollecttime",new Date());
+
+				/**
+				 //关联查询数据,单值查询
+				 Map headdata = SQLExecutor.queryObjectWithDBName(Map.class,context.getEsjdbc().getDbConfig().getDbName(),
+				 "select * from head where billid = ? and othercondition= ?",
+				 context.getIntegerValue("billid"),"otherconditionvalue");//多个条件用逗号分隔追加
+				 //将headdata中的数据,调用addFieldValue方法将数据加入当前es文档，具体如何构建文档数据结构根据需求定
+				 context.addFieldValue("headdata",headdata);
+				 //关联查询数据,多值查询
+				 List<Map> facedatas = SQLExecutor.queryListWithDBName(Map.class,context.getEsjdbc().getDbConfig().getDbName(),
+				 "select * from facedata where billid = ?",
+				 context.getIntegerValue("billid"));
+				 //将facedatas中的数据,调用addFieldValue方法将数据加入当前es文档，具体如何构建文档数据结构根据需求定
+				 context.addFieldValue("facedatas",facedatas);
+				 */
 			}
 		});
-		//数据异步同步通道缓存队列设置，默认为10
-		importBuilder.setTranDataBufferQueue(5);
 		//映射和转换配置结束
 		importBuilder.setExportResultHandler(new ExportResultHandler<RecordMetadata>() {
 			@Override
 			public void success(TaskCommand<RecordMetadata> taskCommand, RecordMetadata result) {
 				TaskMetrics taskMetric = taskCommand.getTaskMetrics();
-//				logger.debug("处理耗时："+taskCommand.getElapsed() +"毫秒");
-//				logger.debug(taskCommand.getTaskMetrics().toString());
+				System.out.println("处理耗时："+taskCommand.getElapsed() +"毫秒");
+				System.out.println(taskCommand.getTaskMetrics());
 			}
 
 			@Override
 			public void error(TaskCommand<RecordMetadata> taskCommand, RecordMetadata result) {
-				logger.warn(taskCommand.getTaskMetrics().toString());
+				System.out.println(taskCommand.getTaskMetrics());
 			}
 
 			@Override
 			public void exception(TaskCommand<RecordMetadata> taskCommand, Throwable exception) {
-				logger.warn(taskCommand.getTaskMetrics().toString(),exception);
+				System.out.println(taskCommand.getTaskMetrics());
 			}
-
 
 		});
 
+        importBuilder.setUseJavaName(true);
 		importBuilder.setContinueOnError(true);//任务出现异常，是否继续执行作业：true（默认值）继续执行 false 中断作业执行
 		importBuilder.setPrintTaskLog(true);
 
 		/**
-		 * 构建和启动导出elasticsearch数据并发送kafka同步作业
+		 * 构建和启动导出关系数据库数据并发送kafka同步作业
 		 */
 		DataStream dataStream = importBuilder.builder();
 		dataStream.execute();
-//		dataStream.destroy(true);
+
 	}
 
 }

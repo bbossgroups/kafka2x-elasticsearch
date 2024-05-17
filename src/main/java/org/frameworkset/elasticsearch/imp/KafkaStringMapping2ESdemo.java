@@ -167,7 +167,7 @@ public class KafkaStringMapping2ESdemo {
 			public void refactor(Context context) throws Exception  {
 
 				 // 获取原始的Kafka记录
-				 KafkaStringRecord record = (KafkaStringRecord) context.getCurrentRecord();
+				 KafkaStringRecord record = (KafkaStringRecord) context.getCurrentRecord().getRecord();
 				 if(record.getKey() == null)
 				 	System.out.println("key is null!");
                  String message = (String)record.getData();
