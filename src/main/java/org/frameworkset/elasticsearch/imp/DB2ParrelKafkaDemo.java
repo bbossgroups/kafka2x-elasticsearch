@@ -235,7 +235,7 @@ public class DB2ParrelKafkaDemo {
 		importBuilder.setGeoipAsnDatabase("c:/geolite2/GeoLite2-ASN.mmdb");
 		importBuilder.setGeoip2regionDatabase("c:/geolite2/ip2region.db");
 		/**
-		 * 重新设置es数据结构
+		 * 数据加工处理
 		 */
 		importBuilder.setDataRefactor(new DataRefactor() {
 			public void refactor(Context context) throws Exception  {
