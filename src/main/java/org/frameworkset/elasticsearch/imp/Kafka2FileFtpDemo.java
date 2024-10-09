@@ -77,14 +77,14 @@ public class Kafka2FileFtpDemo {
 		FtpOutConfig ftpOutConfig = new FtpOutConfig();
 		ftpOutConfig.setBackupSuccessFiles(true);
 		ftpOutConfig.setTransferEmptyFiles(true);
-		ftpOutConfig.setFtpIP("192.168.137.133")
+		ftpOutConfig.setTransferProtocol(FtpConfig.TRANSFER_PROTOCOL_SFTP).setFtpIP("192.168.137.133")
                 .setFtpPort(22)
                 .setFtpUser("k8s")
                 .setFtpPassword("123456")
                 .setRemoteFileDir("/home/k8s/ftptest")
                 .setKeepAliveTimeout(100000)
                 .setFailedFileResendInterval(300000)
-                .setTransferProtocol(FtpConfig.TRANSFER_PROTOCOL_SFTP);
+                ;
 
 		fileOutputConfig.setFtpOutConfig(ftpOutConfig);
 		fileOutputConfig.setDisableftp(false);
