@@ -144,12 +144,14 @@ configure(allprojects) { project ->
 		){
 			exclude group: 'log4j', module: 'log4j'
 			exclude group: 'org.slf4j', module: 'slf4j-log4j12'
+            exclude group: 'org.slf4j', module: 'slf4j-reload4j'
             exclude group: 'org.apache.zookeeper', module: 'zookeeper'
 		}
 
 		api ([group: 'org.apache.kafka', name: 'kafka-tools', version: "${kafka2x}", transitive: true],){
 			exclude group: 'log4j', module: 'log4j'
 			exclude group: 'org.slf4j', module: 'slf4j-log4j12'
+            exclude group: 'org.slf4j', module: 'slf4j-reload4j'
 			exclude group: 'org.eclipse.jetty', module: 'jetty-server'
 
 			exclude group: 'org.eclipse.jetty', module: 'jetty-servlets'
@@ -161,11 +163,13 @@ configure(allprojects) { project ->
 		api ([group: 'org.apache.kafka', name: 'kafka-clients', version: "${kafka2x}", transitive: true],){
 			exclude group: 'log4j', module: 'log4j'
 			exclude group: 'org.slf4j', module: 'slf4j-log4j12'
+            exclude group: 'org.slf4j', module: 'slf4j-reload4j'
 		}
 
 		api ([group: 'org.apache.kafka', name: 'kafka-streams', version: "${kafka2x}", transitive: true],){
 			exclude group: 'log4j', module: 'log4j'
 			exclude group: 'org.slf4j', module: 'slf4j-log4j12'
+            exclude group: 'org.slf4j', module: 'slf4j-reload4j'
 		}
 //		api 'org.apache-extras.beanshell:bsh:2.0b6'
 		api 'org.xerial:sqlite-jdbc:3.45.1.0'

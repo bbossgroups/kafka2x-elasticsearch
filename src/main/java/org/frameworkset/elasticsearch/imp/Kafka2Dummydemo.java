@@ -17,6 +17,7 @@ package org.frameworkset.elasticsearch.imp;
 
 
 import com.frameworkset.util.SimpleStringUtil;
+import org.frameworkset.elasticsearch.serial.SerialUtil;
 import org.frameworkset.tran.CommonRecord;
 import org.frameworkset.tran.DataRefactor;
 import org.frameworkset.tran.DataStream;
@@ -130,7 +131,7 @@ public class Kafka2Dummydemo {
 				.addKafkaConfig("auto.commit.interval.ms","5000")
 				.addKafkaConfig("auto.offset.reset","latest")
 //				.addKafkaConfig("bootstrap.servers","192.168.137.133:9093")
-				.addKafkaConfig("bootstrap.servers","192.168.137.133:9092")
+				.addKafkaConfig("bootstrap.servers","10.13.6.127:9092")
 				.addKafkaConfig("enable.auto.commit","false")
 				.addKafkaConfig("max.poll.records","500") // The maximum number of records returned in a single call to poll().
 				.setKafkaTopic("db2kafka") // kafka topic
@@ -147,7 +148,7 @@ public class Kafka2Dummydemo {
 		dummyOutputConfig.setRecordGenerator(new RecordGenerator() {
 			@Override
 			public void buildRecord(TaskContext taskContext, CommonRecord record, Writer builder) throws Exception{
-				SimpleStringUtil.object2json(record.getDatas(),builder);
+				SerialUtil.object2jsonDisableCloseAndFlush(record.getDatas(),builder);
 
 			}
 		}).setPrintRecord(true);
@@ -307,17 +308,17 @@ public class Kafka2Dummydemo {
 		importBuilder.setExportResultHandler(new ExportResultHandler<String>() {
 			@Override
 			public void success(TaskCommand<String> taskCommand, String result) {
-				System.out.println(taskCommand.getTaskMetrics());
+				logger.info(taskCommand.getTaskMetrics().toString());
 			}
 
 			@Override
 			public void error(TaskCommand<String> taskCommand, String result) {
-				System.out.println(taskCommand.getTaskMetrics());
+                logger.error(taskCommand.getTaskMetrics().toString());
 			}
 
 			@Override
 			public void exception(TaskCommand<String> taskCommand, Throwable exception) {
-				System.out.println(taskCommand.getTaskMetrics());
+                logger.error(taskCommand.getTaskMetrics().toString());
 			}
 
 
@@ -340,7 +341,6 @@ public class Kafka2Dummydemo {
 		DataStream dataStream = importBuilder.builder();
 		dataStream.execute();//执行同步操作
 
-		System.out.println();
 	}
 
 }
