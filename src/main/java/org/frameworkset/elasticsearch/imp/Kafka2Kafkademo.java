@@ -134,10 +134,11 @@ public class Kafka2Kafkademo {
 				.addKafkaConfig("auto.commit.interval.ms","5000")
 				.addKafkaConfig("auto.offset.reset","latest")
 //				.addKafkaConfig("bootstrap.servers","192.168.137.133:9093")
-				.addKafkaConfig("bootstrap.servers","192.168.137.1:9092")
+//				.addKafkaConfig("bootstrap.servers","192.168.137.1:9092")
+                .addKafkaConfig("bootstrap.servers","172.24.176.18:9092")
 				.addKafkaConfig("enable.auto.commit","true")
 				.addKafkaConfig("max.poll.records","500") // The maximum number of records returned in a single call to poll().
-				.setKafkaTopic("es2kafka") // kafka topic
+				.setKafkaTopic("db2kafka") // kafka topic
 				.setConsumerThreads(5) // 并行消费线程数，建议与topic partitions数一致
 				.setKafkaWorkQueue(10)
 				.setKafkaWorkThreads(2)
@@ -146,7 +147,7 @@ public class Kafka2Kafkademo {
 				.setValueCodec(CODEC_JSON)
 				.setKeyCodec(CODEC_LONG);
 
-
+        importBuilder.setInputConfig(kafka2InputConfig);
 		// kafka输出服务器参数配置
 		// kafka 2x 客户端参数项及说明类：org.apache.kafka.clients.consumer.ConsumerConfig
 		Kafka2OutputConfig kafkaOutputConfig = new Kafka2OutputConfig();
@@ -154,7 +155,7 @@ public class Kafka2Kafkademo {
 		kafkaOutputConfig.addKafkaProperty("value.serializer","org.apache.kafka.common.serialization.StringSerializer");
 		kafkaOutputConfig.addKafkaProperty("key.serializer","org.apache.kafka.common.serialization.LongSerializer");
 		kafkaOutputConfig.addKafkaProperty("compression.type","gzip");
-		kafkaOutputConfig.addKafkaProperty("bootstrap.servers","127.0.0.1:9092");
+		kafkaOutputConfig.addKafkaProperty("bootstrap.servers","172.24.176.18:9092");
 		kafkaOutputConfig.addKafkaProperty("batch.size","10");
 //		kafkaOutputConfig.addKafkaProperty("linger.ms","10000");
 //		kafkaOutputConfig.addKafkaProperty("buffer.memory","10000");

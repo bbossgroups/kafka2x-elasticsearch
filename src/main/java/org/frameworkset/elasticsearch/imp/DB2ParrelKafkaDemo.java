@@ -136,11 +136,13 @@ public class DB2ParrelKafkaDemo {
 		kafkaOutputConfig.addKafkaProperty("value.serializer","org.apache.kafka.common.serialization.StringSerializer");
 		kafkaOutputConfig.addKafkaProperty("key.serializer","org.apache.kafka.common.serialization.LongSerializer");
 		kafkaOutputConfig.addKafkaProperty("compression.type","gzip");
-		kafkaOutputConfig.addKafkaProperty("bootstrap.servers","192.168.137.133:9092");
+//		kafkaOutputConfig.addKafkaProperty("bootstrap.servers","192.168.137.133:9092");
+        kafkaOutputConfig.addKafkaProperty("bootstrap.servers","172.24.176.18:9092");
+        
 		kafkaOutputConfig.addKafkaProperty("batch.size","10");
 //		kafkaOutputConfig.addKafkaProperty("linger.ms","10000");
 //		kafkaOutputConfig.addKafkaProperty("buffer.memory","10000");
-		kafkaOutputConfig.setKafkaAsynSend(true);
+//		kafkaOutputConfig.setKafkaAsynSend(true);
 //指定文件中每条记录格式，不指定默认为json格式输出
 		kafkaOutputConfig.setRecordGenerator(new RecordGenerator() {
 			@Override
