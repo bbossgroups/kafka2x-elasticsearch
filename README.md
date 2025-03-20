@@ -21,6 +21,14 @@ Spring boot： 1.x,2.x,+
 [使用参考文档](https://esdoc.bbossgroups.com/#/db-es-tool)
 
 # 导入maven坐标
+```xml
+<dependency>
+  <groupId>com.bbossgroups.plugins</groupId>
+  <artifactId>bboss-datatran-kafka2x</artifactId>
+  <version>7.3.7-jdk17</version>
+  <scope>compile</scope>
+</dependency>
+```
 参考bboss kafka组件文档：https://doc.bbossgroups.com/#/kafka
 
 # 构建部署
