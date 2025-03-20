@@ -29,7 +29,7 @@ Spring boot： 1.x,2.x,3.x+
   <scope>compile</scope>
 </dependency>
 ```
-参考bboss kafka组件文档：https://doc.bbossgroups.com/#/kafka
+参考bboss kafka组件文档导入kafka客户端包：https://doc.bbossgroups.com/#/kafka
 
 # 构建部署
 
