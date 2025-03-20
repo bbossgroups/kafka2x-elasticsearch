@@ -136,7 +136,7 @@ public class DB2KafkaDemo {
 		kafkaOutputConfig.addKafkaProperty("value.serializer","org.apache.kafka.common.serialization.StringSerializer");
 		kafkaOutputConfig.addKafkaProperty("key.serializer","org.apache.kafka.common.serialization.LongSerializer");
 		kafkaOutputConfig.addKafkaProperty("compression.type","gzip");
-//		kafkaOutputConfig.addKafkaProperty("bootstrap.servers","10.13.6.128:9092");
+//		kafkaOutputConfig.addKafkaProperty("bootstrap.servers","103.13.6.128:9092");
         kafkaOutputConfig.addKafkaProperty("bootstrap.servers","192.168.137.133:9092");
 		kafkaOutputConfig.addKafkaProperty("batch.size","10");
 //		kafkaOutputConfig.addKafkaProperty("linger.ms","10000");
