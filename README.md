@@ -29,7 +29,7 @@ Spring boot： 1.x,2.x,+
   <scope>compile</scope>
 </dependency>
 ```
-参考bboss kafka组件文档：https://doc.bbossgroups.com/#/kafka
+参考bboss kafka组件文档导入kafka客户端包：https://doc.bbossgroups.com/#/kafka
 
 # 构建部署
 
@@ -69,12 +69,11 @@ org.frameworkset.elasticsearch.imp.Kafka2DBdemo
 
 
 ```java
-public class Kafka2ESdemo {
+public class Kafka2DBdemo {
 	public static void main(String[] args){
 		Kafka2DBdemo dbdemo = new Kafka2DBdemo();
-		boolean dropIndice = true;//CommonLauncher.getBooleanAttribute("dropIndice",false);//同时指定了默认值
 
-		dbdemo.scheduleTimestampImportData(dropIndice);
+		dbdemo.scheduleTimestampImportData();
 	}
     .....
 }
