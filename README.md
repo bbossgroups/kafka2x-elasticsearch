@@ -11,7 +11,7 @@ Spring boot： 1.x,2.x,+
 # kafka2x-Elasticsearch kafka2x-Database数据同步工具demo
  适用于新版本kafka client包  ,使用本demo所带的应用程序运行容器环境，可以快速编写，打包发布可运行的数据导入工具
 
-支持的kafka_2.12-0.10.2.0系列版本、 kafka_2.12-2.3.0 系列版本
+支持的kafka_2.12-0.10.2.0系列版本、 kafka_2.12-2.3.0 系列版本、kafka 4.0.0
 
 支持的Elasticsearch版本：
 1.x,2.x,5.x,6.x,7.x,8.x,+
@@ -21,86 +21,7 @@ Spring boot： 1.x,2.x,+
 [使用参考文档](https://esdoc.bbossgroups.com/#/db-es-tool)
 
 # 导入maven坐标
-
-```xml
-<dependency>
-  <groupId>com.bbossgroups.plugins</groupId>
-  <artifactId>bboss-datatran-kafka2x</artifactId>
-  <version>7.2.0</version>
-  <scope>compile</scope>
-</dependency>
-```
-
-根据kafka服务端版本导入和调整kafka client版本及版本号：
-
-```xml
-<dependency>
-            <groupId>org.apache.kafka</groupId>
-            <artifactId>kafka_2.12</artifactId>
-            <version>2.4.0</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>log4j</groupId>
-                    <artifactId>log4j</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-log4j12</artifactId>
-                </exclusion>
-            </exclusions>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.kafka</groupId>
-            <artifactId>kafka-tools</artifactId>
-            <version>2.4.0</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>log4j</groupId>
-                    <artifactId>log4j</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-log4j12</artifactId>
-                </exclusion>
-            </exclusions>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.kafka</groupId>
-            <artifactId>kafka-clients</artifactId>
-            <version>2.4.0</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>log4j</groupId>
-                    <artifactId>log4j</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-log4j12</artifactId>
-                </exclusion>
-            </exclusions>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.kafka</groupId>
-            <artifactId>kafka-streams</artifactId>
-            <version>2.4.0</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>log4j</groupId>
-                    <artifactId>log4j</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-log4j12</artifactId>
-                </exclusion>
-            </exclusions>
-            <scope>compile</scope>
-        </dependency>
-```
-
-
+参考bboss kafka组件文档：https://doc.bbossgroups.com/#/kafka
 
 # 构建部署
 
@@ -223,7 +144,7 @@ importBuilder.setQueue(queueSize);//设置批量导入线程池等待队列长�
 importBuilder.setThreadCount(workThreads);//设置批量导入线程池工作线程数量
 ```
 
- bin/kafka-console-consumer.sh --zookeeper 10.19.85.65:2185 --topic mysqlbinlog 
+ 
 
 ## 技术交流群:166471282 
 
