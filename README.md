@@ -7,8 +7,8 @@ JDK requirement: JDK 1.8+
 
 Elasticsearch version requirements: 1.x,2.X,5.X,6.X,8.x,+
 
-Spring boot： 1.x,2.x,+
-# kafka2x-Elasticsearch kafka2x-Database数据同步工具demo
+Spring boot： 1.x,2.x,3.x+
+# 基于kafka数据同步工具demo
  适用于新版本kafka client包  ,使用本demo所带的应用程序运行容器环境，可以快速编写，打包发布可运行的数据导入工具
 
 支持的kafka_2.12-0.10.2.0系列版本、 kafka_2.12-2.3.0 系列版本、kafka 4.0.0
@@ -69,7 +69,7 @@ org.frameworkset.elasticsearch.imp.Kafka2DBdemo
 
 
 ```java
-public class Kafka2ESdemo {
+public class Kafka2DBdemo {
 	public static void main(String[] args){
 		Kafka2DBdemo dbdemo = new Kafka2DBdemo();
 		boolean dropIndice = true;//CommonLauncher.getBooleanAttribute("dropIndice",false);//同时指定了默认值
