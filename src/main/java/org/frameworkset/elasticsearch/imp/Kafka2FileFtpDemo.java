@@ -120,7 +120,7 @@ public class Kafka2FileFtpDemo {
 						e.printStackTrace();
 					}
 				});
-//				SerialUtil.normalObject2json(record.getDatas(),builder);
+//				SerialUtil.object2jsonDisableCloseAndFlush(record.getDatas(),builder);
 
 			}
 		});
