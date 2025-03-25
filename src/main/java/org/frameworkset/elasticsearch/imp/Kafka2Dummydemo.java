@@ -131,7 +131,7 @@ public class Kafka2Dummydemo {
 				.addKafkaConfig("auto.commit.interval.ms","5000")
 				.addKafkaConfig("auto.offset.reset","latest")
 //				.addKafkaConfig("bootstrap.servers","192.168.137.133:9093")
-				.addKafkaConfig("bootstrap.servers","10.13.6.127:9092")
+				.addKafkaConfig("bootstrap.servers","101.131.6.127:9092")
 				.addKafkaConfig("enable.auto.commit","false")
 				.addKafkaConfig("max.poll.records","500") // The maximum number of records returned in a single call to poll().
 				.setKafkaTopic("db2kafka") // kafka topic
