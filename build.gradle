@@ -134,10 +134,10 @@ configure(allprojects) { project ->
 			[group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: log4j2_version, transitive: true],
 		)
 		api(
-				[group: 'com.bbossgroups.plugins', name: 'bboss-datatran-kafka2x', version: "${bboss_es_version}", transitive: true],
-				[group: 'com.bbossgroups.plugins', name: 'bboss-datatran-fileftp', version: "${bboss_es_version}", transitive: true],
-				[group: 'com.bbossgroups.plugins', name: 'bboss-datatran-hbase', version: "${bboss_es_version}", transitive: true],
-				[group: 'com.bbossgroups.plugins', name: 'bboss-datatran-mongodb', version: "${bboss_es_version}", transitive: true],
+				[group: 'com.bbossgroups.plugins', name: 'bboss-datatran-kafka2x', version: bboss_es_version, transitive: true],
+				[group: 'com.bbossgroups.plugins', name: 'bboss-datatran-fileftp', version: bboss_es_version, transitive: true],
+				[group: 'com.bbossgroups.plugins', name: 'bboss-datatran-hbase', version: bboss_es_version, transitive: true],
+				[group: 'com.bbossgroups.plugins', name: 'bboss-datatran-mongodb', version: bboss_es_version, transitive: true],
 		)
 		api (
 				[group: 'org.apache.kafka', name: 'kafka_2.12', version: "${kafka2x_12}", transitive: true],
