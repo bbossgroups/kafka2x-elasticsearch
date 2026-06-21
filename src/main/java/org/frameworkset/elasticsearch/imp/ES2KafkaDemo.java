@@ -332,12 +332,13 @@ public class ES2KafkaDemo {
 //		importBuilder.addFieldMapping("logOperuser","LOG_OPERUSER");
 
 		//设置ip地址信息库地址
-		importBuilder.setGeoipDatabase("c:/data/geolite2/GeoLite2-City.mmdb");
-		importBuilder.setGeoipAsnDatabase("c:/data/geolite2/GeoLite2-ASN.mmdb");
-		importBuilder.setGeoip2regionDatabase("c:/data/geolite2/ip2region.db");
-		/**
-		 * 重新设置es数据结构
-		 */
+        importBuilder.setGeoipDatabase("C:/workdir/geolite2/GeoLite2-City.mmdb");
+        importBuilder.setGeoipAsnDatabase("C:/workdir/geolite2/GeoLite2-ASN.mmdb");
+        importBuilder.setGeoip2regionDatabase("C:/workdir/geolite2/ip2region_v4.xdb;C:/workdir/geolite2/ip2region_v6.xdb");
+
+        /**
+         * 重新设置es数据结构
+         */
 		importBuilder.setDataRefactor(new DataRefactor() {
 			public void refactor(Context context) throws Exception  {
 				//可以根据条件定义是否丢弃当前记录

@@ -305,10 +305,11 @@ public class Filelog2KafkaSplitDemo {
 //		importBuilder.addFieldMapping("logOperuser","LOG_OPERUSER");
 
 		//设置ip地址信息库地址
-		importBuilder.setGeoipDatabase("c:/geolite2/GeoLite2-City.mmdb");
-		importBuilder.setGeoipAsnDatabase("c:/geolite2/GeoLite2-ASN.mmdb");
-		importBuilder.setGeoip2regionDatabase("c:/geolite2/ip2region.db");
-		importBuilder.addCallInterceptor(new CallInterceptor() {
+        importBuilder.setGeoipDatabase("C:/workdir/geolite2/GeoLite2-City.mmdb");
+        importBuilder.setGeoipAsnDatabase("C:/workdir/geolite2/GeoLite2-ASN.mmdb");
+        importBuilder.setGeoip2regionDatabase("C:/workdir/geolite2/ip2region_v4.xdb;C:/workdir/geolite2/ip2region_v6.xdb");
+
+        importBuilder.addCallInterceptor(new CallInterceptor() {
 			@Override
 			public void preCall(TaskContext taskContext) {
 				//文件开始被采集前调用

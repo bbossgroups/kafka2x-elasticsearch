@@ -233,12 +233,13 @@ public class DB2ParrelKafkaDemo {
 //		importBuilder.addFieldMapping("logContent","LOG_CONTENT");
 //		importBuilder.addFieldMapping("logOperuser","LOG_OPERUSER");
 		//设置ip地址信息库地址
-		importBuilder.setGeoipDatabase("c:/geolite2/GeoLite2-City.mmdb");
-		importBuilder.setGeoipAsnDatabase("c:/geolite2/GeoLite2-ASN.mmdb");
-		importBuilder.setGeoip2regionDatabase("c:/geolite2/ip2region.db");
-		/**
-		 * 数据加工处理
-		 */
+        importBuilder.setGeoipDatabase("C:/workdir/geolite2/GeoLite2-City.mmdb");
+        importBuilder.setGeoipAsnDatabase("C:/workdir/geolite2/GeoLite2-ASN.mmdb");
+        importBuilder.setGeoip2regionDatabase("C:/workdir/geolite2/ip2region_v4.xdb;C:/workdir/geolite2/ip2region_v6.xdb");
+
+        /**
+         * 数据加工处理
+         */
 		importBuilder.setDataRefactor(new DataRefactor() {
 			public void refactor(Context context) throws Exception  {
 				//可以根据条件定义是否丢弃当前记录
